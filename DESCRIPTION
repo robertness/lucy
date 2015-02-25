@@ -1,9 +1,16 @@
 Package: igraphr
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
-Date: 2015-02-25
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Title:  Adds common graph operations to R igraph that makes graph manipulation via igraph simpler and easier to do. 
+Version: 0.1
+Author: Robert Ness
+Maintainer: robertness@gmail.com
+Description: igraphr creates higher level graph operations build upon the basic graph data 
+             structure and graph operations found in igraph.  igraphr is useful to anyone 
+             who likes using igraph as their primary tool for working with graph data 
+             structures.
+License: GPL-2
+Depends: R (>= 2.14)
+Imports: igraph (>= 0.7.1),
+         bnlearn
+Suggests: knitr
+VignetteBuilder: knitr
