@@ -1,3 +1,19 @@
+#' Type checking for igraph vertex arguments.
+#' 
+#' igraph fnctions that use igraph vertices as arguments can typicall take
+#' the vertex object itself (igraph.vs), the vertex id (numeric),
+#' or the vertex name (character).  This flexibility can lead to unsafe code.
+#' The convention in this package is to use the vertex name.  
+#' 
+#' @param v Assumed to represent a vertex.
+#' 
+#' This function, returns an error if v is not of the class 'character'.
+checkVertex <- function(v){
+  if(!is.character(v)){
+    stop("Use vertex names instead of vertex objects as arguments.")
+  }
+}
+
 examineAttr <- function(g, property, formatAttr=NULL){
   #property = c("vertex", "edge", "graph")
   #formatAttr = optional formating function to be applied to return attribute value
@@ -26,11 +42,13 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
 }
 
 iparents <- function(g, v){
-  V(g)[nei(v, mode="in")]
+  checkVertex(v)
+  V(g)[nei(v, mode="in")]$name
 }
 
 ichildren <- function(g, v){
-  V(g)[nei(v, mode="out")]
+  checkVertex(v)
+  V(g)[nei(v, mode="out")]$name
 }
 
 updateNode <- function(g, v.index, getDeterminers, callback){  
