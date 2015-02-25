@@ -3,7 +3,6 @@ Type: Package
 Title:  Adds common graph operations to R igraph that makes graph manipulation via igraph simpler and easier to do. 
 Version: 0.1
 Author: Robert Ness
-Maintainer: robertness@gmail.com
 Description: igraphr creates higher level graph operations build upon the basic graph data 
              structure and graph operations found in igraph.  igraphr is useful to anyone 
              who likes using igraph as their primary tool for working with graph data 
