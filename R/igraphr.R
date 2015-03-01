@@ -41,16 +41,6 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
   list(graph = g.attribute.list, vertices = v.attribute.list, edges = e.attribute.list)
 }
 
-iparents <- function(g, v){
-  checkVertex(v)
-  V(g)[nei(v, mode="in")]$name
-}
-
-ichildren <- function(g, v){
-  checkVertex(v)
-  V(g)[nei(v, mode="out")]$name
-}
-
 updateNode <- function(g, v.index, getDeterminers, callback){  
   v <- V(g)[v.index]
   if(!v$updated){
@@ -70,8 +60,7 @@ updateNode <- function(g, v.index, getDeterminers, callback){
   g
 }
 
-updateVertices <- function(g, getDeterminers, callback){
-  
+updateVertices <- function(g, getDeterminers, callback){ 
   for(v.index in 1:vcount(g)){
     g <- updateNode(g, v.index, getDeterminers, callback) 
   }
@@ -118,37 +107,10 @@ updateEdges <- function(g, getDeterminers, callback){
   g <- resetUpdateAttributes(g)
 }
 
-inDegree <- function(g, v.set){
-  require(igraph)
-  igraph::degree(g, v = v.set,  mode = "in")
-}
-
 nameEdges <- function(g, e.set){
-  require(igraph)
+  
   el <- get.edgelist(g)
   apply(el[e.set, , drop=F], 1 , paste, collapse="->")
-}
-
-generateMultiConnectedDAG <- function(n){  
-  #An alternative to the Barabasi algorithm in igraph which 
-  #generates a scale-free DAG.
-  #This uses Ide's and Cozman's DAG algorithm in the bnlearn package, which generates DAGS with 
-  #more connectivity. 
-  #Limiting to one output node
-  require(bnlearn, quietly = T, warn.conflicts = F)
-  bn.net <- random.graph(paste(1:n), method = "ic-dag")
-  simmed.leaves <- nodes(bn.net)[vapply(nodes(bn.net), 
-                                        function(node) length(children(bn.net, node))==0,
-                                        TRUE)]
-  if(length(simmed.leaves) > 1){
-    true.leaf <- sample(simmed.leaves, 1)
-    arcs(bn.net) <- rbind(arcs(bn.net), cbind(setdiff(simmed.leaves, true.leaf), true.leaf))
-  }
-  gNEL.net <- as.graphNEL(bn.net)
-  detach(package:bnlearn)
-  require(igraph, quietly = T, warn.conflicts = F)
-  igraph.net <- igraph.from.graphNEL(gNEL.net)
-  igraph.net
 }
 
 getDownstreamNodes <- function(g, v){
@@ -163,9 +125,11 @@ getDownstreamNodes <- function(g, v){
   }
   unique(v.bucket)
 }
-
 isBDownstreamOfA <- function(g, a, b){
-  b %in% getDownstreamNodes(g, a)
+  sp <- suppressWarnings(shortest.paths(g, v = a, to = b, 
+                       mode = "out",
+                       algorithm = "unweighted"))[a, b]
+  is.finite(sp)
 }
 
 getConnectingNodes <- function(g, v1, v2){
@@ -188,15 +152,13 @@ getConnectingEdges <- function(g, src, trg){
   }
   output.edges
 }
-igraphGraphvizPlot <- function(g, plot.args=NULL){
+igraphVizPlot <- function(g, plot.args=NULL){
   #Plots an igraph DAG with Rraphviz via the bnlearn package
   #The default layout in Rgraphviz for DAGS is more interpretable than igraph 
   #layouts, especially when the DAGs are densely connected
   #bnlearn package is used as an intermediary because it has 
   #straightfowward DAG checking and Rgraphviz plotting
-  require(igraph, quietly = T, warn.conflicts = F)  
   gNEL <- igraph.to.graphNEL(g)
-  require(bnlearn, quietly = T, warn.conflicts = F)
   net <- as.bn(gNEL)
   args <- c(list(x = net), plot.args)
   do.call("graphviz.plot", args)
@@ -256,6 +218,3 @@ reverseWalk <- function(g, use.weights = F){
   randomWalk(new.g, V(new.g)[type == "output"], use.weights = use.weights)
 }
 
-igraph.to.bn <- function(g){
-  bnlearn::as.bn(igraph.to.graphNEL(g))
-}

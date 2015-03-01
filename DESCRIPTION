@@ -8,9 +8,9 @@ Description: igraphr creates higher level graph operations build upon the basic 
              who likes using igraph as their primary tool for working with graph data 
              structures.
 License: GPL-2
-Depends: R (>= 2.14)
-Imports: igraph (>= 0.7.1),
-         bnlearn
+Depends: R (>= 2.14),
+         igraph (>= 0.7.1)
+Imports: bnlearn
 Suggests: knitr,
     testthat
 VignetteBuilder: knitr

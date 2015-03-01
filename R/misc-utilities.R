@@ -17,8 +17,8 @@ ichildren <- function(g, v){
 #' g <- ba.game(10)
 #' inDegree(g, V(g))
 inDegree <- function(g, v.set){
-  if(!igraph::is.directed(g)) stop("Graph not directed.")
-  igraph::degree(g, v = v.set,  mode = "in")
+  if(!is.directed(g)) stop("Graph not directed.")
+  degree(g, v = v.set,  mode = "in")
 }
 #' Out degree of a set of vertices in a directed graph
 #' 
@@ -29,8 +29,8 @@ inDegree <- function(g, v.set){
 #' g <- ba.game(10)
 #' inDegree(g, V(g))
 outDegree <- function(g, v.set){
-  if(!igraph::is.directed(g)) stop("Graph not directed.")
-  igraph::degree(g, v = v.set,  mode = "out")
+  if(!is.directed(g)) stop("Graph not directed.")
+  degree(g, v = v.set,  mode = "out")
 }
 
 #' Find all the root vertices in a directed graph.
@@ -42,9 +42,9 @@ outDegree <- function(g, v.set){
 #' g <- ba.game(10)
 #' getRoots(g)
 getRoots <- function(g){
-  if(!igraph::is.directed(g)) stop("Must be a directed graph.")
-  if(is.null(igraph::V(g)$name)) igraph::V(g)$name <- paste(igraph::V(g))
-  igraph::V(g)[inDegree(g, igraph::V(g)) == 0]$name
+  if(!is.directed(g)) stop("Must be a directed graph.")
+  if(is.null(V(g)$name)) V(g)$name <- paste(V(g))
+  V(g)[inDegree(g, V(g)) == 0]$name
 }
 
 #' Find all the leaf vertices in a directed graph.
@@ -56,16 +56,16 @@ getRoots <- function(g){
 #' g <- ba.game(10)
 #' getLeaves(g)
 getLeaves <- function(g){
-  if(!igraph::is.directed(g)) stop("Must be a directed graph.")
-  if(is.null(igraph::V(g)$name)) igraph::V(g)$name <- paste(igraph::V(g))
-  igraph::V(g)[outDegree(g, igraph::V(g)) == 0]$name
+  if(!is.directed(g)) stop("Must be a directed graph.")
+  if(is.null(V(g)$name)) V(g)$name <- paste(V(g))
+  V(g)[outDegree(g, V(g)) == 0]$name
 }
 
 igraph2bn <- function(g){
-  bnlearn::as.bn(igraph::igraph.to.graphNEL(g))
+  bnlearn::as.bn(igraph.to.graphNEL(g))
 }
 
 bn2igraph <- function(net){
-  igraph::igraph.from.graphNEL(bnlearn::as.graphNEL(net))
+  igraph.from.graphNEL(bnlearn::as.graphNEL(net))
 } 
 

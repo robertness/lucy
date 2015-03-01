@@ -20,7 +20,7 @@ generateMultiConnectedDAG <- function(n){
                           cbind(setdiff(simmed.leaves, true.leaf), true.leaf))
   }
   gNEL.net <- bnlearn::as.graphNEL(bn.net)
-  igraph.net <- igraph::igraph.from.graphNEL(gNEL.net)
+  igraph.net <- igraph.from.graphNEL(gNEL.net)
   igraph.net
 }
 
@@ -46,7 +46,7 @@ layerDAGs <- function(k, n){
   nets <- lapply(node.name.list, function(node.names){
     bn2igraph(bnlearn::random.graph(node.names, method = "ic-dag"))
   })
-  g <- igraph::graph.empty()
+  g <- graph.empty()
   for(i in 1:k){
     g <- g + nets[[i]]
   }
@@ -59,7 +59,7 @@ layerDAGs <- function(k, n){
     current.to <- c(current.roots, ichildren(net, current.roots))
     el <- expand.grid(last.from, current.to)
     names(el) <- c("from", "to")
-    g <- g + igraph::edges(as.character(t(el)))
+    g <- g + edges(as.character(t(el)))
   }
   for(wgt in list.edge.attributes(g)){
     g <- remove.edge.attribute(g, wgt)
