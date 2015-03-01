@@ -1,6 +1,6 @@
 Package: igraphr
 Type: Package
-Title:  Adds common graph operations to R igraph that makes graph manipulation via igraph simpler and easier to do. 
+Title: Adds common graph operations to R igraph that makes graph manipulation via igraph simpler and easier to do. 
 Version: 0.1
 Author: Robert Ness
 Description: igraphr creates higher level graph operations build upon the basic graph data 
@@ -11,5 +11,6 @@ License: GPL-2
 Depends: R (>= 2.14)
 Imports: igraph (>= 0.7.1),
          bnlearn
-Suggests: knitr
+Suggests: knitr,
+    testthat
 VignetteBuilder: knitr
