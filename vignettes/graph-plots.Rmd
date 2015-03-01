@@ -1,12 +1,10 @@
----
-title: igraphr Visualization 
-author: Robert Osazuwa Ness
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+<!--
+  %\VignetteIndexEntry{More igraph visualization with igraphr}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
----
+-->
+
+# More igraph visualization with igraphr
 
 The goal of **igraphr** is to use igraph as the main tool for managing and manipulating data with a graph/network structure, while at the same time making use of other tools the R ecosystem has for working with graphs.  
 
@@ -20,13 +18,16 @@ library(bnlearn)
 
 ## Graphviz + igraph
 
+igraph's ba.game function creates a scale-free network.
+
 ```{r, message=FALSE}
 g <- ba.game(20)
 igraphVizPlot(g)
 ```
 
+igraphr's layerDAGs function stacks layers of highly-connected DAGs on top of one another.
+
 ```{r}
-g <- layerDAGs(3, 4)
+g <- layerDAGs(6, 3)
 igraphVizPlot(g)
 ```
-
