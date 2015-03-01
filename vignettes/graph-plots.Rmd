@@ -1,0 +1,32 @@
+---
+title: igraphr Visualization 
+author: Robert Osazuwa Ness
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+The goal of **igraphr** is to use igraph as the main tool for managing and manipulating data with a graph/network structure, while at the same time making use of other tools the R ecosystem has for working with graphs.  
+
+Here, I examine various **igraphr** wrappers for visualizing graph objects. 
+
+```{r}
+#devtools::install_github("osazuwa223/igraphr")
+library(igraphr)
+```
+
+## Graphviz 
+
+```{r}
+g <- ba.game(20)
+igraphVizPlot(g)
+```
+
+```{r}
+g <- layerDAGs(3, 4)
+igraphVizPlot(g)
+```
+

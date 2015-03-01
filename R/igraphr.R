@@ -152,17 +152,6 @@ getConnectingEdges <- function(g, src, trg){
   }
   output.edges
 }
-igraphVizPlot <- function(g, plot.args=NULL){
-  #Plots an igraph DAG with Rraphviz via the bnlearn package
-  #The default layout in Rgraphviz for DAGS is more interpretable than igraph 
-  #layouts, especially when the DAGs are densely connected
-  #bnlearn package is used as an intermediary because it has 
-  #straightfowward DAG checking and Rgraphviz plotting
-  gNEL <- igraph.to.graphNEL(g)
-  net <- as.bn(gNEL)
-  args <- c(list(x = net), plot.args)
-  do.call("graphviz.plot", args)
-}
 
 getDependentEdges <- function(g, e){
   #Determine the edges in g whose weights impact the 

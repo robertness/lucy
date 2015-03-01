@@ -42,8 +42,8 @@ outDegree <- function(g, v.set){
 #' g <- ba.game(10)
 #' getRoots(g)
 getRoots <- function(g){
-  if(!is.directed(g)) stop("Must be a directed graph.")
-  if(is.null(V(g)$name)) V(g)$name <- paste(V(g))
+  checkDirected(g)
+  g <- nameVertices(g)
   V(g)[inDegree(g, V(g)) == 0]$name
 }
 
@@ -56,8 +56,8 @@ getRoots <- function(g){
 #' g <- ba.game(10)
 #' getLeaves(g)
 getLeaves <- function(g){
-  if(!is.directed(g)) stop("Must be a directed graph.")
-  if(is.null(V(g)$name)) V(g)$name <- paste(V(g))
+  checkDirected(g)
+  g <- nameVertices(g)
   V(g)[outDegree(g, V(g)) == 0]$name
 }
 
@@ -68,4 +68,16 @@ igraph2bn <- function(g){
 bn2igraph <- function(net){
   igraph.from.graphNEL(bnlearn::as.graphNEL(net))
 } 
+
+nameVertices <- function(g){
+  if(is.null(V(g)$name)) V(g)$name <- paste(V(g))
+  g
+}
+
+checkDirected <- function(g){
+  if(!is.directed(g)) stop("Must be a directed graph.")
+}
+  
+
+
 
