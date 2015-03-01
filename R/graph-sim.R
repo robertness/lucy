@@ -59,7 +59,7 @@ layerDAGs <- function(k, n){
     current.to <- c(current.roots, ichildren(net, current.roots))
     el <- expand.grid(last.from, current.to)
     names(el) <- c("from", "to")
-    g <- g + edges(as.character(t(el)))
+    g <- g + igraph::edges(as.character(t(el)))
   }
   for(wgt in list.edge.attributes(g)){
     g <- remove.edge.attribute(g, wgt)

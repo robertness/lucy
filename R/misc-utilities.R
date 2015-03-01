@@ -18,7 +18,7 @@ ichildren <- function(g, v){
 #' inDegree(g, V(g))
 inDegree <- function(g, v.set){
   if(!is.directed(g)) stop("Graph not directed.")
-  degree(g, v = v.set,  mode = "in")
+  igraph::degree(g, v = v.set,  mode = "in")
 }
 #' Out degree of a set of vertices in a directed graph
 #' 
@@ -30,7 +30,7 @@ inDegree <- function(g, v.set){
 #' inDegree(g, V(g))
 outDegree <- function(g, v.set){
   if(!is.directed(g)) stop("Graph not directed.")
-  degree(g, v = v.set,  mode = "out")
+  igraph::degree(g, v = v.set,  mode = "out")
 }
 
 #' Find all the root vertices in a directed graph.

@@ -18,6 +18,8 @@ igraphVizPlot <- function(g, plot.args=NULL){
   net <- bnlearn::empty.graph(V(g)$name)
   bnlearn::arcs(net) <- get.edgelist(g)
   args <- c(list(x = net), plot.args)
-  do.call("graphviz.plot", args, envir = as.environment("package:bnlearn"))
+  if(!requireNamespace("bnlearn", quietly = TRUE)) "bnlearn not attached. 
+                                                    Try library(bnlearn) first."
+  do.call("graphviz.plot", args)
 }
 

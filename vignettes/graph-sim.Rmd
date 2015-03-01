@@ -1,6 +1,6 @@
 ---
 title: "Random Graph Generation"
-author: "Robert Ness"
+author: "Robert Osazuwa Ness"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -12,6 +12,7 @@ vignette: >
 ```{r}
 #devtools::install_github("osazuwa223/igraphr")
 library(igraphr)
+library(bnlearn)
 ```
 
 The generation of graphs in igraph does not provide many options.  The following functions generate highly connected DAGs.
@@ -27,6 +28,6 @@ igraphVizPlot(g)
 ```
 
 ```{r}
-g <- layerDAGs(6, 10)
+g <- layerDAGs(6, 3)
 igraphVizPlot(g)
 ```

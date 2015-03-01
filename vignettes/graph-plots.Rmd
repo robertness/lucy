@@ -1,7 +1,6 @@
 ---
 title: igraphr Visualization 
 author: Robert Osazuwa Ness
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -13,14 +12,15 @@ The goal of **igraphr** is to use igraph as the main tool for managing and manip
 
 Here, I examine various **igraphr** wrappers for visualizing graph objects. 
 
-```{r}
+```{r, message=FALSE}
 #devtools::install_github("osazuwa223/igraphr")
 library(igraphr)
+library(bnlearn)
 ```
 
-## Graphviz 
+## Graphviz + igraph
 
-```{r}
+```{r, message=FALSE}
 g <- ba.game(20)
 igraphVizPlot(g)
 ```
