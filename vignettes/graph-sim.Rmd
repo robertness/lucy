@@ -1,7 +1,6 @@
 <!--
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Random Graph Generation with igraphr}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteDepends{Random Graph Generation with *igraphr*}
   \usepackage[utf8]{inputenc}
 -->
 

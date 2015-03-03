@@ -1,0 +1,9 @@
+<!--
+  %\VignetteIndexEntry{More igraph visualization with igraphr}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+-->
+
+# Recursive Graph Traversal with igraph 
+
+
