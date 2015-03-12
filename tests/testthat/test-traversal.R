@@ -1,0 +1,1 @@
+#Test traversal should throw an error if callback doesn't return a g

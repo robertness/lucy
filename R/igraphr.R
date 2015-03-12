@@ -14,6 +14,7 @@ checkVertex <- function(v){
   }
 }
 
+
 examineAttr <- function(g, property, formatAttr=NULL){
   #property = c("vertex", "edge", "graph")
   #formatAttr = optional formating function to be applied to return attribute value
@@ -40,8 +41,6 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
   e.attribute.list <- examineAttr(g, "edge", formatEdgeAttr)
   list(graph = g.attribute.list, vertices = v.attribute.list, edges = e.attribute.list)
 }
-
-
 
 nameEdges <- function(g, e.set){
   el <- get.edgelist(g)

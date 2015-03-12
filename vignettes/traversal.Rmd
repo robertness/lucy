@@ -4,6 +4,117 @@
   \usepackage[utf8]{inputenc}
 -->
 
+
+
 # Recursive Graph Traversal with igraph 
 
 
+
+* At each node a calculation is performed.  The result of the calculation is stored as an attributed of that node.
+* Each node has another attribute, "updated", which initially has the value of FALSE, and becomes TRUE after the calculation is successfully completed.
+* The calculation depends on the value of other nodes, called determiners.  The determiners all have to be 
+
+
+```{r}
+library(magrittr)
+library(plyr)
+library(igraphr)
+```
+## Prediction from a Multi-layer perceptron
+
+Here I fit a neural network model called a multi-layer perceptron, and use graph traversal to make a prediction.
+
+*infert* is a dataset in the *datasets* package with data on infertility after spontaneous and induced abortion.  Using the *nnet* package, I fit an MLP that predicts infertility given the number of prior induced and spontaneous abortions and parity (case count).
+
+```{r}
+data(infert, package="datasets")
+net.infert <- neuralnet(case ~ parity + induced + spontaneous, infert,
+                        hidden = 3,
+                        err.fct="sse", linear.output=FALSE, likelihood=TRUE)
+plot(net.infert)
+```
+
+I can use this fitted model for prediction by passing it new input values to the *comput* function.
+
+```{r}
+compute(net.infert, data.frame(parity = 3, 
+                               induced = 2, 
+                               spontaneous = 1))
+```
+
+The input values are propagated to the neurons (hidden nodes), and those values are propagated to the outcome.
+
+Now I do this with traversal.
+
+Convert to igraph object.
+
+```{r}
+inputs <- c("parity", "induced", "spontaneous")
+wts <- net.infert$weights[[1]]
+dimnames(wts[[1]]) <- list(c("bias1", inputs),
+                           c("H1", "H2", "H3"))
+dimnames(wts[[2]]) <- list(c("bias2", "H1", "H2", "H3"), "case")
+library(bnlearn)
+g <- wts %>%
+  lapply(melt) %>%
+  rbind.fill %>%
+  `names<-`(c("from", "to", "weight")) %>%
+  graph.data.frame %T>%
+  igraphVizPlot
+```
+
+The weights are stored as the "weight" edge attribute.
+
+```{r}
+E(g)$weight
+```
+
+The MLP maps the inputs (*induced*, *spontaneous*, *parity*) to the output (*case*).  We create a vertex attribute call *value*.     
+
+Activation function
+```{r}
+activate <- function(x)  1 / (1 + exp(-x))
+```
+
+Calculation callback
+
+```{r}
+calculateNode <- function(g, v){
+  parents <- iparents(g, v)
+  wts <- E(g)[parents %->% v]$weight
+  V(g)[v]$value <- V(g)[parents]$value %>%
+    {. * wts} %>% #Multiply values by weights
+    sum %>% # Sum them up
+    activate # Apply the activation function
+  g
+}
+```
+
+iparents
+
+```{r}
+
+V(g)$value <- NA
+V(g)[inputs]$value <- c(3, 2, 1)
+V(g)["bias1"]$value <- V(g)["bias2"]$value <- 1
+```
+
+updates
+
+```{r}
+V(g)$updated <- FALSE
+V(g)[c(inputs, "bias1", "bias2")]$updated <- TRUE
+```
+
+
+```{r}
+g <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
+```
+
+Comparing the original prediction to these results:
+```{r}
+unlist(compute(net.infert, data.frame(parity = 3,
+                                      induced = 2, 
+                                      spontaneous = 1)))
+V(g)["case"]$value
+```
