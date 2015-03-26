@@ -4,12 +4,14 @@ Title: Adds common graph operations to R igraph that makes graph manipulation vi
 Version: 0.1
 Author: Robert Ness
 Description: igraphr creates higher level graph operations build upon the basic graph data 
-             structure and graph operations found in igraph.  igraphr is useful to anyone 
-             who likes using igraph as their primary tool for working with graph data 
-             structures.
+             structure and graph operations found in igraph.  igraphr is useful to those 
+             who like using igraph as their primary tool for working with graph data 
+             structures, and is looking for some extended functionality, especially with more 
+             commonly used graph and tree search algorithms.
 License: GPL-2
 Depends: R (>= 2.14),
-         igraph (>= 0.7.1)
+         igraph (>= 0.7.1),
+         magrittr
 Imports: bnlearn
 Suggests: knitr,
     testthat

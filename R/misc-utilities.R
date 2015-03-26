@@ -1,3 +1,7 @@
+with.igraph.vs <- function(data, expr, ...) {
+  eval(substitute(data$c, list(c = substitute(expr))))
+}
+
 iparents <- function(g, v){
   checkVertex(v)
   V(g)[nei(v, mode="in")]$name
