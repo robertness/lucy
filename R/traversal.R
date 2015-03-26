@@ -1,4 +1,44 @@
-#Callback should return a modified graph object
+#' Check if updated attribute is present
+#' 
+#' @g igraph graph object
+#' @selector functions E or V
+checkUpdateAttr <- function(g, selector){
+  check.null <- g %>% 
+    selector %>% {
+      .$updated
+    } %>%
+    is.null 
+  if(check.null) stop("No update attribute is present.")
+}
+
+#' Traversal for an iGraph.
+#' 
+#' This closure generates functions for traversing a graph.
+#'   
+#' @g v Assumed to represent a vertex.
+#' @selector function E if working with edges, or V if working with vertices
+#' 
+#' This function, returns an error if v is not of the class 'character'.
+getUpdater <- function(g, selector){
+  checkUpdateAttr(g, selector)
+  if(!V(g)[v]$updated){
+    determiner.vertices <- getDeterminers(g, v)
+    if(length(determiner.vertices) > 0){
+      test.determiners.unupdated <- !V(g)[determiner.vertices]$updated
+      if(any(test.determiners.unupdated)){
+        unupdated.determiners <- determiner.vertices[test.determiners.unupdated]
+        for(d in unupdated.determiners){
+          g <- updateNode(g, d, getDeterminers, callback)
+        }
+      }
+    }
+    g <- callback(g, v)
+    V(g)[v]$updated <- TRUE
+  }
+  g
+  
+}
+
 updateNode <- function(g, v, getDeterminers, callback){
   if(!V(g)[v]$updated){
     determiner.vertices <- getDeterminers(g, v)

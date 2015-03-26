@@ -4,14 +4,12 @@
   \usepackage[utf8]{inputenc}
 -->
 
-
-
 # Recursive Graph Traversal with igraph 
 
+## How Traversal is Approached Here
 
-
-* At each node a calculation is performed.  The result of the calculation is stored as an attributed of that node.
-* Each node has another attribute, "updated", which initially has the value of FALSE, and becomes TRUE after the calculation is successfully completed.
+* At each vertex of an igraph object a calculation is performed.  The result of the calculation is stored as a vertex attribute of that vertex.
+* Each vertex has another attribute, "updated", which initially has the value of FALSE, and becomes TRUE after the calculation is successfully completed.
 * The calculation depends on the value of other nodes, called determiners.  The determiners all have to be 
 
 
