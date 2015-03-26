@@ -1,1 +1,1 @@
-#Test traversal should throw an error if callback doesn't return a g
+#test that the input to updateNode is a graph, based on a bug I made  - remember the recursiveness
