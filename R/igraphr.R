@@ -42,11 +42,6 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
   list(graph = g.attribute.list, vertices = v.attribute.list, edges = e.attribute.list)
 }
 
-nameEdges <- function(g, e.set){
-  el <- get.edgelist(g)
-  apply(el[e.set, , drop=F], 1 , paste, collapse="->")
-}
-
 getDownstreamNodes <- function(g, v){
   v.bucket <- NULL
   v.children <- ichildren(g, v)

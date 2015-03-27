@@ -18,6 +18,16 @@ library(magrittr)
 library(plyr)
 library(igraphr)
 ```
+
+## Comparison to igraph Traversal.
+
+igraphr graph propagation solves the problem of performing calculations on the vertices/edges in the graph that depend on the states of other vertices/edges in the graph.  It works using logical T/F vertex/edge attributed called updated;
+
+1. When the calculation is successfully completed, the vertex/edge 'updated' attribute is set to TRUE.  
+2. The calculation almost always relies on the states of certain other vertices/edges, and can ONLY be completed if all of those vertices/edges are already updated. 
+
+## Propagating Multiplication in a Directed Network
+
 ## Prediction from a Multi-layer perceptron
 
 Here I fit a neural network model called a multi-layer perceptron, and use graph traversal to make a prediction.
@@ -116,3 +126,6 @@ unlist(compute(net.infert, data.frame(parity = 3,
                                       spontaneous = 1)))
 V(g)["case"]$value
 ```
+
+## Back-propagation on a Multi-layer Perceptron
+*Coming soon*

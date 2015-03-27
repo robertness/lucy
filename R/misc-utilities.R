@@ -73,8 +73,18 @@ bn2igraph <- function(net){
   igraph.from.graphNEL(bnlearn::as.graphNEL(net))
 } 
 
-nameVertices <- function(g){
-  if(is.null(V(g)$name)) V(g)$name <- paste(V(g))
+nameEdges <- function(g, e.set = E(g)){
+  if(is.null(E(g)$name)){
+    el <- get.edgelist(g)
+    E(g)[e.set]$name <- apply(el[e.set, , drop=F], 1 , paste, collapse="->") 
+  }
+  g
+}
+
+nameVertices <- function(g, v.set = V(g)){
+  if(is.null(V(g)$name)){
+    V(g)[v.set]$name <- paste(V(g)[v.set])
+  }
   g
 }
 

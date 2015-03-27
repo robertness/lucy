@@ -19,9 +19,11 @@ generateMultiConnectedDAG <- function(n){
     bnlearn::arcs(bn.net) <- rbind(bnlearn::arcs(bn.net), 
                           cbind(setdiff(simmed.leaves, true.leaf), true.leaf))
   }
-  gNEL.net <- bnlearn::as.graphNEL(bn.net)
-  igraph.net <- igraph.from.graphNEL(gNEL.net)
-  igraph.net
+  bn.net %>%
+    bnlearn::as.graphNEL %>%
+    igraph.from.graphNEL %>%
+    nameEdges() %>%
+    nameVertices
 }
 
 
@@ -64,5 +66,5 @@ layerDAGs <- function(k, n){
   for(wgt in list.edge.attributes(g)){
     g <- remove.edge.attribute(g, wgt)
   }
-  g
+  g 
 }

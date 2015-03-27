@@ -1,5 +1,10 @@
 context("Graph Traveral")
+
+ba.dag <- ba.game(100)
+
+
 test_that("Check that updater closure creates vertex updater and edge updates.", {
+  vUpdater <- getUpdater(g, V)
   
 })
 
