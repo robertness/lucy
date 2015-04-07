@@ -23,7 +23,7 @@ getUpdater <- function(iterator){
   updater <- function(g, obj, getDeterminers, callback){
     checkNames(obj)  #Temporary measure to enforce indexing by name
     checkAttributes(g)
-    if(!S(g)[obj]$updated){
+    if(!S(g)[obj]$updated){ #'S' is either E or V, set by setIterator()
       determiners <- getDeterminers(g, obj)
       if(length(determiners) > 0){
         test.determiners.unupdated <- !S(g)[determiners]$updated
@@ -35,6 +35,7 @@ getUpdater <- function(iterator){
         }
       }
       g <- callback(g, obj)
+      if(!is.igraph(g)) stop("Your callback needs to return a valid igraph object.")
       S(g)[obj]$updated <- TRUE
     }
     g

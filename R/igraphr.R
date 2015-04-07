@@ -42,18 +42,30 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
   list(graph = g.attribute.list, vertices = v.attribute.list, edges = e.attribute.list)
 }
 
-getDownstreamNodes <- function(g, v){
-  v.bucket <- NULL
-  v.children <- ichildren(g, v)
-  if(length(v.children) > 0){
-    v.bucket <- c(v.bucket, v.children)
-    children.w.children <- v.children[sapply(v.children, function(child) length(ichildren(g, child)) > 0)]
-    if(length(children.w.children) > 0){
-      v.bucket <- c(v.bucket, unlist(sapply(children.w.children, getDownstreamNodes, g = g)))
-    }
-  }
-  unique(v.bucket)
+#' Find all Vertices Upstream or Downstream of a Given Vertex in Directed Graph  
+#' 
+#' @param g igraph object
+#' @param v character, the name of a vertex in g
+#' @return character vector of vertex names.
+#' @export
+getDownstreamNodes <- function(g, w){
+  if(!is.directed(g)) stop("Graph must be directed.")
+  shortest.paths(g, v = V(g), to = w, mode = "in")[, w] %>% #Get the shortest path vector for all that have 
+    #paths coming into w
+    Filter(f=is.finite) %>% #Keep online the finite length paths 
+    names %>% # collect their nanmes
+    setdiff(w) # exclude the source node itself
 }
+#' @rdname getDownstreamNodes
+getUpstreamNodes <- function(g, w){
+  if(!is.directed(g)) stop("Graph must be directed.")
+  shortest.paths(g, v = V(g), to = w, mode = "out")[, w] %>% #Get the shortest path vector for all that have 
+    #paths coming into w
+    Filter(f=is.finite) %>% #Keep online the finite length paths 
+    names %>% # collect their nanmes
+    setdiff(w) # exclude the source node itself
+}
+
 isBDownstreamOfA <- function(g, a, b){
   sp <- suppressWarnings(shortest.paths(g, v = a, to = b, 
                        mode = "out",
