@@ -1,4 +1,3 @@
-
 context("Graph Simulations")
 test_that("layered DAG flows from top to bottom.", {
   g.skinny <- layerDAGs(10, 3)

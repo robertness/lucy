@@ -26,7 +26,6 @@ generateMultiConnectedDAG <- function(n){
     nameVertices
 }
 
-
 #' Generate graph comprised of sequentially layered randomly generated DAGs.
 #' 
 #' This is useful for generating a random network that is layered in structure. 

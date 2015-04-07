@@ -1,24 +1,28 @@
-#' Check if updated attribute is present
-#' 
-#' @g igraph graph object
-#' @S either of igraph sequence selector functions `E` or `V`
-checkUpdateAttr <- function(g, S){
-  check.null <- selector(g)$updated %>% is.null 
-  if(check.null) stop("No update attribute is present.")
+# Temporary measure to make sure only workings with names.  
+# Will expand later to make sure that names, numeric indices, or igraph.es/igraph.vs all work.
+checkNames <- function(obj){
+  if(class(obj) != "character") stop("Only indexing with character names at this time.")
 }
 
-#' Propagation.
+#' Check if updated attribute is present
 #' 
-#' This closure generates functions for traversing a graph.
+#' @param g igraph graph object
+checkAttributes <- function(g){
+  check.null <- is.null(S(g)$updated)  || is.null(S(g)$name)
+  if(check.null) stop("Either 'name' or 'updated' attribute missing.")
+}
+
+#' Propagator closure
+#' 
+#' A closure generates functions for doing propagations on a graph.
 #'   
-#' @g igraph graph object.
-#' @S either of igraph sequence selector functions `E` or `V`; 
-#' E if traversing over edges, or V if traversing over vertices
-#' 
-#' This function, returns an error if v is not of the class 'character'.
-getUpdater <- function(g, S){
-  checkUpdateAttr(g, S)
+#' @param iterator either "edge", or "vertex"
+#' @return A function that updates edges (S = E) or vertices (S = V)
+getUpdater <- function(iterator){
+  setIterator(iterator)
   updater <- function(g, obj, getDeterminers, callback){
+    checkNames(obj)  #Temporary measure to enforce indexing by name
+    checkAttributes(g)
     if(!S(g)[obj]$updated){
       determiners <- getDeterminers(g, obj)
       if(length(determiners) > 0){
@@ -37,9 +41,15 @@ getUpdater <- function(g, S){
   }
   updater
 }
-getTraverser <- function(g, S){
+#' Traversal for Propogation
+#' 
+#' This closure creates a function that traverses the graph, applying the updater as it travels.
+#'   
+#' @param iterator either "edge", or "vertex"
+#' E if traversing over edges, or V if traversing over vertices
+getTraverser <- function(iterator){
   traverser <- function(g, getDeterminers, callback){
-    updater <- getUpdater(g, S)
+    updater <- getUpdater(iterator)
     for(obj.name in S(g)$name){
       g <- updater(g, obj.name, getDeterminers, callback) 
     }
@@ -51,22 +61,29 @@ getTraverser <- function(g, S){
   }
   traverser
 }
-#' Vertex traversal for an iGraph.
-#' 
-#' Graph traversal is the problem of visiting all the vertices in a graph in a particular manner, 
-#' updating and/or checking their values along the way.
+
+#' Vertex/Edge Propagation in igraph
 #'   
-#' @g A graph object.
-#' @getDeterminers 
+#' Foundation for any graph propagation algorithm, where the states of vertexes or edges propagate through the graph,
+#' changing the states of others.  Traverse the graph, land on a vertex/edge, perform a callback function on the 
+#' vertex/edge.  That callback can depend on the states of other 'determiner' vertices/edges.  When the callback is 
+#' completed successfully, the 'updated' attribute of the object is changed to \code{TRUE}. If those determiners do 
+#' not have the status \code{updated == TRUE}, then the function recursively performs the callback on the determiners until all 
+#' their states are updated, before finalling performing the callback on the original vertex/edge.
 #' 
-#' callback either of igraph sequence selector functions `E` or `V`; 
-#' E if traversing over edges, or V if traversing over vertices
-#' 
-#' This function, returns an error if v is not of the class 'character'.
+#' \code{updateVertices} performs propagation on vertices. \code{updateEdges} performs propagation on edges.  
+#'   
+#' @param g A graph object.
+#' @param getDeterminers The function that gives the vertices/edges that must be updated for the callback to be 
+#' executed 
+#' @param callback The function performed on each vertex/edge
+#' @return A igraph object with updated vertex/edge states. A warning message is returned if not all vertices 
+#' could be updated.
 #' @export
-updateVertices <- getTraverser(g, V)
-#' @export
-updateEdges <- getTraverser(g, E)
+updateVertices <- getTraverser("vertex")
+
+#' @describeIn updateVertices 
+updateEdges <- getTraverser("edge")
 
 #' Graph Traversal
 #' 
