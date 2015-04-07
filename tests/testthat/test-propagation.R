@@ -57,20 +57,21 @@ test_that("The callback returns a graph object", {
 })
 
 test_that("Product of parents on a DAG works", {
-  g <- ba.game(3) %>% nameVertices
-  V(g)$value <- c(3, 4, 5)
+  # See the vignette on proopagation for an explanation of this test.
+  g <- ba.game(10) %>% nameVertices
+  V(g)$value <- log(sample(1:50, 10))
   V(g)$updated <- FALSE
-  getProduct <- function(g, v) {
+  getSum <- function(g, v) {
     parent.nodes <- iparents(g, v)
     if(length(parent.nodes) > 0) {
-      V(g)[v]$value <- prod(V(g)[iparents(g, v)]$value)
+      V(g)[v]$value <- V(g)[v]$value + sum(V(g)[iparents(g, v)]$value)
     }
     g
   }
-  g.final <- updateVertices(g, iparents, getProduct)
+  g.final <- updateVertices(g, iparents, getSum)
   leaf <- getLeaves(g)[1]
   upstream.nodes <- getUpstreamNodes(g, leaf)
-  expect_equal(V(g.final)[leaf]$value, prod(c(V(g)[upstream.nodes]$value))) #bug
+  expect_equal(V(g.final)[leaf]$value, sum(V(g)$value))
 })
 # test_that("Works on a cyclic directed graph with cycles", {
 #   
