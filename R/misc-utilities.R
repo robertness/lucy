@@ -121,7 +121,7 @@ nameEdges <- function(g, e.set = E(g)){
 # Enable indexing edges by name
 #' @export
 `[.igraph.es` <- function(x, i){
-  if(class(i) == "character" && !is.null(x$name)){
+  if(all(i %in% x$name)){
     return(x[x$name == i])
   } else {
     return(igraph::`[.igraph.es`(x, i)) 
