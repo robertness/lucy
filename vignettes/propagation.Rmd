@@ -6,12 +6,27 @@
 
 # Recursive Graph Propagation with igraph 
 
-## How Propagation is Approached Here
+## Motivation for Propagation Algorithm in igraph
 
-* At each vertex of an igraph object a calculation is performed.  The result of the calculation is stored as a vertex attribute of that vertex.
-* Each vertex has another attribute, "updated", which initially has the value of FALSE, and becomes TRUE after the calculation is successfully completed.
-* The calculation depends on the value of other nodes, called determiners.  The determiners all have to be 
+Definition of propagation in a system of variables:
 
+* The state of a given variable depends on the states of others.
+* Before updating the state of a variable, the state of variables it depends on must be updated first. 
+
+Examples of this type of systematic update includes:
+
+* Gibbs sampling and other MCMC methods
+* Belief propagation
+* Boolean networks
+* Cellular automata
+
+When variables are vertices/nodes (I use the terms interchangebly) or edges in a graph, then a change to the state of one object "propagates" through the rest of the graph.
+
+igraphr builds the basis for such propogations using igraph.
+
+Propagation is done with one of either two functions, *updateVertices* or *updateEdges*, which predictably do propagation on edges or on vertices.  Each take an igraph object as an argument, as well as two other key arguments; functions "getDeterminers" and "callback".  
+
+*getDeterminers* must be a function that takes the arguments *g* for a graph object, and *obj*, which is a character naming either a vertex or an edge in the graph g.
 
 ```{r, echo=FALSE,message=FALSE}
 library(plyr, quietly = T)
@@ -21,18 +36,11 @@ library(igraphr, quietly = T)
 library(bnlearn, quietly = T)
 ```
 
-## Comparison to igraph Propagation.
+## Propagation of Sums in a Directed Network
 
-igraphr graph propagation solves the problem of performing calculations on the vertices/edges in the graph that depend on the states of other vertices/edges in the graph.  It works using logical T/F vertex/edge attributed called updated;
+I start by demonstrating a simple propagation on a tree.  Each node has an initial value.  Then, the value for each node is updated as the sum of its initial value and the values of each of the parents.  Before the value for a node can be calculated, the value of the parents must already have been calculated.
 
-1. When the calculation is successfully completed, the vertex/edge 'updated' attribute is set to TRUE.  
-2. The calculation almost always relies on the states of certain other vertices/edges, and can ONLY be completed if all of those vertices/edges are already updated. 
-
-## Propagating of Sums in a Directed Network
-
-I start by demonstrating a simple propagation on a tree.  Each node has an initial value.  Then, the value for each node is updated as the sum of its initial value and the values of each of the parents.  Before the value for a node can be summed, the value of the parents must already be updated.
-
-First, I create the graph, create initial values for each node, and then set the updated attribute to FALSE.  I take the logs of randomly selected integers as initial values for plotting reasons, but any number will work in the propagation.
+First, I create the graph, create initial values for each node, and then set the *updated* attribute to FALSE.  
 
 ```{r}
 g <- ba.game(10) %>% nameVertices
@@ -60,7 +68,7 @@ g.final <- updateVertices(g, iparents, getSum)
 
 The results:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
   V(g)$name <- round(V(g)$value, 2)
   V(g.final)$name <-round(V(g.final)$value,2)
   par(mfrow = c(1,2))
@@ -70,12 +78,12 @@ The results:
 
 ## Prediction from a Multi-layer perceptron
 
-Here I fit a neural network model called a multi-layer perceptron, and use graph Propagation to make a prediction.
+Here I fit a neural network model called a multi-layer perceptron, and use graph propagation to make a prediction.
 
 *infert* is a dataset in the *datasets* package with data on infertility after spontaneous and induced abortion.  Using the *neuralnet* package, I fit an MLP that predicts infertility given the number of prior induced and spontaneous abortions and parity (case count).
 
-```{r}
-library(neuralnet)
+```{r, message=FALSE}
+library(neuralnet, quietly=TRUE)
 data(infert, package="datasets")
 net.infert <- neuralnet(case ~ parity + induced + spontaneous, infert,
                         hidden = 3,
@@ -86,16 +94,19 @@ plot(net.infert)
 I can use this fitted model for prediction by passing it new input values to the *compute* function.
 
 ```{r}
-neuralnet::compute(net.infert, data.frame(parity = 3, 
+nnet.prediction <- neuralnet::compute(net.infert, data.frame(parity = 3, 
                                induced = 2, 
-                               spontaneous = 1))
+                               spontaneous = 1)) %>%
+  unlist %>% round(2) %>% #unlist and round the results
+  `names<-`(c("bias1", "parity", "induced", "spontaneous", "bias2",
+                                  "H1", "H2", "H3", "case")) #name the variables
 ```
 
-The input values are propagated to the neurons (hidden nodes), and those values are propagated to the outcome.
+The input values are propagated to the neurons (hidden nodes), and those values are propagated to the outcome I wish to predict.
 
-Now I do this with Propagation.
+Now I demonstrate the same predictive results with propagation.
 
-Convert to igraph object.
+I start by converting the neural net structure to an igraph object.
 
 ```{r}
 inputs <- c("parity", "induced", "spontaneous")
@@ -118,28 +129,7 @@ The weights are stored as the "weight" edge attribute.
 E(g)$weight
 ```
 
-The MLP maps the inputs (*induced*, *spontaneous*, *parity*) to the output (*case*).  We create a vertex attribute call *value*.     
-
-Activation function
-```{r}
-activate <- function(x)  1 / (1 + exp(-x))
-```
-
-Calculation callback
-
-```{r}
-calculateNode <- function(g, v){
-  parents <- iparents(g, v)
-  wts <- E(g)[parents %->% v]$weight
-  V(g)[v]$value <- V(g)[parents]$value %>%
-    {. * wts} %>% #Multiply values by weights
-    sum %>% # Sum them up
-    activate # Apply the activation function
-  g
-}
-```
-
-iparents
+I add a 'value' attribute to the vertices.  The values for the input are given as 3, 2, 1.  These will be used to calculate values for the hidden variables and ultimately the output variable "case". 
 
 ```{r}
 V(g)$value <- NA
@@ -147,24 +137,46 @@ V(g)[inputs]$value <- c(3, 2, 1)
 V(g)["bias1"]$value <- V(g)["bias2"]$value <- 1
 ```
 
-updates
+I add a "updated" attribute to the vertices as well.  The biases will always have a value of 1, and the inputs are fixed, so I set their *updated* attribute to true.
 
 ```{r}
 V(g)$updated <- FALSE
 V(g)[c(inputs, "bias1", "bias2")]$updated <- TRUE
 ```
 
+The activation function in the neural network is the logistic function:
 
 ```{r}
-#g <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
+activate <- function(x)  1 / (1 + exp(-x))
+```
+
+The activation function is what calculates the value of a node given its parents.  So I use it to create a callback called *calculateNode*. 
+
+```{r}
+calculateNode <- function(g, v){
+  parents <- iparents(g, v)
+  #wts <- E(g)[parents %->% v]$weight
+  wts <- igraph::`[.igraph.es`(E(g), parents %->% v)$weight
+  V(g)[v]$value <- activate(sum(V(g)[parents]$value * wts)) 
+  g
+}
+```
+
+Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  This function exists in *igraphr*, it is *iparents*.
+
+Now we are ready for the propagation of values across the vertices.
+
+```{r}
+g.final <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
+propagation.prediction <- V(g.final)$value
+names(propagation.prediction) <- V(g.final)$name
 ```
 
 Comparing the original prediction to these results:
+
 ```{r}
-unlist(neuralnet::compute(net.infert, data.frame(parity = 3,
-                                      induced = 2, 
-                                      spontaneous = 1)))
-#V(g)["case"]$value
+round(nnet.prediction, 2)
+round(propagation.prediction, 2)
 ```
 
 ## Back-propagation on a Multi-layer Perceptron

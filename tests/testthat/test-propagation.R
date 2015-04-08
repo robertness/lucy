@@ -44,7 +44,11 @@ test_that("edge/vertex propagation without a name or update attribute will throw
   })
 })
 
-test_that("The callback returns a graph object", {
+test_that("callback and getDeterminers functions are set up correctly.", {
+  #The only way to do this is with a functional.  
+})
+
+test_that("callback function returns a graph object otherwise an error is thrown", {
   g <- ba.game(30) %>% nameVertices
   V(g)$value <- runif(30)
   V(g)$updated <- FALSE
@@ -73,6 +77,62 @@ test_that("Product of parents on a DAG works", {
   upstream.nodes <- getUpstreamNodes(g, leaf)
   expect_equal(V(g.final)[leaf]$value, sum(V(g)$value))
 })
+
+library(neuralnet)
+library(reshape)
+data(infert, package="datasets")
+test_that("method mirrors neural network prediction.",{
+
+  net.infert <- neuralnet(case ~ parity + induced + spontaneous, infert,
+                          hidden = 3,
+                          err.fct="sse", linear.output=FALSE, likelihood=TRUE)
+  #I can use this fitted model for prediction by passing it new input values to the *compute* function.
+  nnet.prediction <- neuralnet::compute(net.infert, data.frame(parity = 3, 
+                                                               induced = 2, 
+                                                               spontaneous = 1)) %>%
+    unlist %>% round(2) %>% #unlist and round the results
+    `names<-`(c("bias1", "parity", "induced", "spontaneous", "bias2",
+                "H1", "H2", "H3", "case")) #name the variables
+  #The input values are propagated to the neurons (hidden nodes), and those values are propagated to the outcome I wish to predict.
+  #Now I demonstrate the same predictive results with propagation.
+  #I start by converting the neural net structure to an igraph object.
+  inputs <- c("parity", "induced", "spontaneous")
+  wts <- net.infert$weights[[1]]
+  dimnames(wts[[1]]) <- list(c("bias1", inputs),
+                             c("H1", "H2", "H3"))
+  dimnames(wts[[2]]) <- list(c("bias2", "H1", "H2", "H3"), "case")
+  g <- wts %>%
+    lapply(melt) %>%
+    rbind.fill %>%
+    `names<-`(c("from", "to", "weight")) %>%
+    graph.data.frame 
+  #The weights are stored as the "weight" edge attribute.
+  #I add a 'value' attribute to the vertices.  The values for the input are given as 3, 2, 1.  These will be used to calculate values for the hidden variables and ultimately the output variable "case". 
+  V(g)$value <- NA
+  V(g)[inputs]$value <- c(3, 2, 1)
+  V(g)["bias1"]$value <- V(g)["bias2"]$value <- 1
+  #I add a "updated" attribute to the vertices as well.  The biases will always have a value of 1, and the inputs are fixed, so I set their *updated* attribute to true.
+  V(g)$updated <- FALSE
+  V(g)[c(inputs, "bias1", "bias2")]$updated <- TRUE
+  #The activation function in the neural network is the logistic function:
+  activate <- function(x)  1 / (1 + exp(-x))
+  #The activation function is what calculates the value of a node given its parents.  So I use it to create a callback called *calculateNode*. 
+  calculateNode <- function(g, v){
+    parents <- iparents(g, v)
+    #wts <- E(g)[parents %->% v]$weight
+    wts <- igraph::`[.igraph.es`(E(g), parents %->% v)$weight
+    V(g)[v]$value <- activate(sum(V(g)[parents]$value * wts)) 
+    g
+  }
+  #Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  This function exists in *igraphr*, it is *iparents*.
+  #Now we are ready for the propagation of values across the vertices.
+  g.final <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
+  propagation.prediction <- round(V(g.final)$value, 2)
+  names(propagation.prediction) <- V(g.final)$name
+  #Comparing the original prediction to these results:
+  expect_equal(nnet.prediction, propagation.prediction)
+})
+
 # test_that("Works on a cyclic directed graph with cycles", {
 #   
 # })

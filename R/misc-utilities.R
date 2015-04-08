@@ -121,11 +121,11 @@ nameEdges <- function(g, e.set = E(g)){
 # Enable indexing edges by name
 #' @export
 `[.igraph.es` <- function(x, i){
-  if(all(i %in% x$name)){
-    return(x[x$name == i])
-  } else {
-    return(igraph::`[.igraph.es`(x, i)) 
+  ret <- try(igraph::`[.igraph.es`(x, i), silent=TRUE)
+  if(class(ret) == "try-error"){
+    ret <- x[x$name == i]
   }
+  ret
 }
 
 checkDirected <- function(g){
