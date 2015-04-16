@@ -34,6 +34,7 @@ library(dplyr, quietly = T)
 library(reshape, quietly = T)
 library(igraphr, quietly = T)
 library(bnlearn, quietly = T)
+library(magrittr, quietly = T)
 ```
 
 ## Propagation of Sums in a Directed Network
@@ -181,3 +182,75 @@ round(propagation.prediction, 2)
 
 ## Back-propagation on a Multi-layer Perceptron
 *Coming soon*
+
+```{r}
+#Split the data into training and test data
+infert.split <- split(infert, f = factor(sample(c("training", "test"), 
+                   size = nrow(infert), 
+                   replace = TRUE, 
+                   prob = c(.7, .3)))
+                  )
+#Fit the model on training data
+net.infert <- neuralnet(case ~ parity + induced + spontaneous, 
+                        infert.split$training,
+                        hidden = c(3, 5, 4), 
+                        err.fct = "sse", 
+                        linear.output = T)
+#Get MSPR
+neuralnet::compute(net.infert, dplyr::select(infert.split$test, 
+                                             parity, induced, spontaneous)) %$%
+  net.result %>%
+  {. - infert.split$test$case} %>%
+  {. ^ 2} %>%
+  mean
+```
+ 
+```{r} 
+inputs
+wts <- net.infert$weights[[1]]
+
+wts <- net.infert$weights[[1]]
+input.layer <- c("bias0", inputs)
+l1 <- c("bias1", paste("L1", 1:3, sep=""))
+l2 <- c("bias2", paste("L2", 1:5, sep =""))
+l3 <- c("bias3", paste("L3", 1:4, sep =""))
+g <- rbind(expand.grid(input.layer, l1),
+      expand.grid(l1, l2),
+      expand.grid(l2, l3),
+      expand.grid(l3, "case")) %>%
+  as.data.frame %>%
+  graph.data.frame
+
+
+
+
+#Values
+n <- nrow(infert.split$test)
+V(g)$value <- list(rep(NA, n))
+V(g)[inputs]$value <- as.list(dplyr::select(infert.split$test, 
+                                             parity, induced, spontaneous))
+V(g)[grepl("bias", V(g)$name)]$value <- list(rep(1, n)) 
+#FALSE
+E(g)$updated <- FALSE
+V(g)[c(inputs, "bias1", "bias2")]$updated <- TRUE
+
+activate <- function(x)  1 / (1 + exp(-x))
+
+calculateNode <- function(g, v){
+  parents <- iparents(g, v)
+  #wts <- E(g)[parents %->% v]$weight
+  wts <- igraph::`[.igraph.es`(E(g), parents %->% v)$weight
+  V(g)[v]$value <- activate(sum(V(g)[parents]$value * wts)) 
+  g
+}
+
+g.final <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
+propagation.prediction <- V(g.final)$value
+names(propagation.prediction) <- V(g.final)$name
+
+
+
+
+
+
+
