@@ -4,7 +4,7 @@
   \usepackage[utf8]{inputenc}
 -->
 
-# Recursive Graph Propagation with igraph 
+# Recursive Graph Propagation with igraph (Work in Progress)
 
 ## Motivation for Propagation Algorithm in igraph
 
@@ -208,8 +208,6 @@ neuralnet::compute(net.infert, dplyr::select(infert.split$test,
 ```{r} 
 inputs
 wts <- net.infert$weights[[1]]
-
-wts <- net.infert$weights[[1]]
 input.layer <- c("bias0", inputs)
 l1 <- c("bias1", paste("L1", 1:3, sep=""))
 l2 <- c("bias2", paste("L2", 1:5, sep =""))
@@ -220,10 +218,6 @@ g <- rbind(expand.grid(input.layer, l1),
       expand.grid(l3, "case")) %>%
   as.data.frame %>%
   graph.data.frame
-
-
-
-
 #Values
 n <- nrow(infert.split$test)
 V(g)$value <- list(rep(NA, n))
@@ -233,21 +227,7 @@ V(g)[grepl("bias", V(g)$name)]$value <- list(rep(1, n))
 #FALSE
 E(g)$updated <- FALSE
 V(g)[c(inputs, "bias1", "bias2")]$updated <- TRUE
-
-activate <- function(x)  1 / (1 + exp(-x))
-
-calculateNode <- function(g, v){
-  parents <- iparents(g, v)
-  #wts <- E(g)[parents %->% v]$weight
-  wts <- igraph::`[.igraph.es`(E(g), parents %->% v)$weight
-  V(g)[v]$value <- activate(sum(V(g)[parents]$value * wts)) 
-  g
-}
-
-g.final <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
-propagation.prediction <- V(g.final)$value
-names(propagation.prediction) <- V(g.final)$name
-
+```
 
 
 
