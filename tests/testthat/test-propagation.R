@@ -16,7 +16,28 @@ test_that("getUpdater closure creates vertex updater and edge updater with the c
   lapply(graph.objects, function(obj){ #For the E edge iterator and V vertex iterator functions
     getUpdater(obj) %>% #create an updater
       formals %>% names %>% #get the arguments of the resulting closure
-      expect_equal(c("g", "obj", "getDeterminers","callback")) #make sure args are as expected.    
+      expect_equal(c("g", "object", "getDeterminers","callback")) #make sure args are as expected.    
+  })
+})
+
+test_that("edge/vertex propagation only works with numeric indices or igraph iterators.", {
+  lapply(graph.objects, function(obj){
+    setIterator(obj)
+    determiner <- function(g, x)  {}
+    callback <- function(g, x) g
+    updater <- getUpdater(obj) 
+    g <- g %>% nameEdges %>% nameVertices 
+    S(g)$updated <- FALSE
+    #Test the outcome is an igraph when using an iterator
+    g.out <- updater(g, S(g)[1], determiner, callback)
+    expect_true(is.igraph(g.out))
+    #Test the same result comes out with a numeric index
+    updater(g, as.numeric(S(g)[1]), determiner, callback) %>%
+      identical(g.out) %>%
+      expect_true
+    #Should get an indexing error if trying to index with a name.
+    expect_error(updater(g, S(g)[1]$name, determiner, callback),
+                 "Refer to edges/vertices with an integer, numeric, or igraph iterators")
   })
 })
 
@@ -26,26 +47,15 @@ test_that("edge/vertex propagation without a name or update attribute will throw
     determiner <- function(g, x)  {}
     callback <- function(g, x) g
     updater <- getUpdater(obj)
-    #Should get an indexing error if trying to index without a name.
-    expect_error(updater(g, S(g)[1], function(g, obj){}, function(g, obj){}), 
-                 "Only indexing with character names at this time.")
-    #In the future, this will be expanded to indexing with igraph.vs, igraph.es, and numeric indeces
-    #Will have to write tests for that.  But in that case, this should return the followingerror 
-    #expect_error(updater(g, S(g)[1], iparents, function(g, obj) {}), 
-    #               "Either 'name' or 'updated' attribute missing.")
     # Confirm just having name attribute isn't sufficient
     g <- nameEdges(g)
     g <- nameVertices(g)
-    expect_error(updater(g, S(g)[1]$name, determiner, callback),
+    expect_error(updater(g, S(g)[1], determiner, callback),
                  "Either 'name' or 'updated' attribute missing.")
     # Confirm if both attributes are present, there is no issue
     S(g)$updated <- FALSE
-    expect_true(is.igraph(updater(g, S(g)[1]$name, determiner, callback)))
+    expect_true(is.igraph(updater(g, S(g)[1], determiner, callback)))
   })
-})
-
-test_that("callback and getDeterminers functions are set up correctly.", {
-  #The only way to do this is with a functional.  
 })
 
 test_that("callback function returns a graph object otherwise an error is thrown", {
@@ -54,13 +64,13 @@ test_that("callback function returns a graph object otherwise an error is thrown
   V(g)$updated <- FALSE
   getProduct <- function(g, v) {
     V(g)[v]$value <- prod(V(g)[iparents(g, v)]$value)
-    #This fails to return a graph, a common mistake
+    #This fails to return an igraph object, a common mistake
   }  
   expect_error(updateVertices(g, iparents, getProduct), 
                "Your callback needs to return a valid igraph object.")
 })
 
-test_that("Product of parents on a DAG works", {
+test_that("product of parents on a DAG works", {
   # See the vignette on proopagation for an explanation of this test.
   g <- ba.game(10) %>% nameVertices
   V(g)$value <- log(sample(1:50, 10))
@@ -78,8 +88,10 @@ test_that("Product of parents on a DAG works", {
   expect_equal(V(g.final)[leaf]$value, sum(V(g)$value))
 })
 
-library(neuralnet)
-library(reshape)
+library(neuralnet, quietly=T)
+library(reshape, quietly=T)
+library(plyr, quietly=T)
+
 data(infert, package="datasets")
 test_that("method mirrors neural network prediction.",{
 
@@ -132,6 +144,9 @@ test_that("method mirrors neural network prediction.",{
   #Comparing the original prediction to these results:
   expect_equal(nnet.prediction, propagation.prediction)
 })
+
+test_that("updateVertices doesn't have X wrong with it causing it to  go into
+          some infinite recursion", {})
 
 # test_that("Works on a cyclic directed graph with cycles", {
 #   

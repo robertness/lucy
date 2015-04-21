@@ -1,20 +1,3 @@
-#' Type checking for igraph vertex arguments.
-#' 
-#' igraph fnctions that use igraph vertices as arguments can typicall take
-#' the vertex object itself (igraph.vs), the vertex id (numeric),
-#' or the vertex name (character).  This flexibility can lead to unsafe code.
-#' The convention in this package is to use the vertex name.  
-#' 
-#' @param v Assumed to represent a vertex.
-#' 
-#' This function, returns an error if v is not of the class 'character'.
-checkVertex <- function(v){
-  if(!is.character(v)){
-    stop("Use vertex names instead of vertex objects as arguments.")
-  }
-}
-
-
 examineAttr <- function(g, property, formatAttr=NULL){
   #property = c("vertex", "edge", "graph")
   #formatAttr = optional formating function to be applied to return attribute value
@@ -49,65 +32,94 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
 #' @return character vector of vertex names.
 #' @export
 getDownstreamNodes <- function(g, w){
+  w <- checkVertex(w)
   if(!is.directed(g)) stop("Graph must be directed.")
-  shortest.paths(g, v = V(g), to = w, mode = "in")[, w] %>% #Get the shortest path vector for all that have 
-    #paths coming into w
+  sp.mat <- shortest.paths(g, v = V(g), to = w, mode = "in") 
+  if(is.null(dimnames(sp.mat))){
+    dimnames(sp.mat) <- list(paste(1:vcount(g)), paste(w))
+  }
+  sp.mat[, paste(w)] %>% #Get the shortest path vector for all that have 
     Filter(f=is.finite) %>% #Keep online the finite length paths 
     names %>% # collect their nanmes
+    as.numeric %>%
     setdiff(w) # exclude the source node itself
 }
 #' @rdname getDownstreamNodes
 getUpstreamNodes <- function(g, w){
+  w <- checkVertex(w)
   if(!is.directed(g)) stop("Graph must be directed.")
-  shortest.paths(g, v = V(g), to = w, mode = "out")[, w] %>% #Get the shortest path vector for all that have 
+  sp.mat <- shortest.paths(g, v = V(g), to = w, mode = "out") 
+  if(is.null(dimnames(sp.mat))){
+    dimnames(sp.mat) <- list(paste(1:vcount(g)), paste(w))
+  }
+  sp.mat[, paste(w)] %>%
+  #Get the shortest path vector for all that have 
     #paths coming into w
     Filter(f=is.finite) %>% #Keep online the finite length paths 
     names %>% # collect their nanmes
+    as.numeric %>%
     setdiff(w) # exclude the source node itself
 }
 
+#' Test if a Vertex is Downstream or Upstream of Another
+#' 
+#' @param g igraph object
+#' @param a numeric index or igraph.vs object, source vertex
+#' @param end vertex
+#' @return TRUE/FALSE value
+#' @export
 isBDownstreamOfA <- function(g, a, b){
+  a <- checkVertex(a)
+  b <- checkVertex(b)
   sp <- suppressWarnings(shortest.paths(g, v = a, to = b, 
                        mode = "out",
-                       algorithm = "unweighted"))[a, b]
+                       algorithm = "unweighted"))[paste(a), paste(b)]
+  is.finite(sp)
+}
+#' @rdname getConnectingNodes
+isBUpstreamOfA <- function(g, a, b){
+  sp <- suppressWarnings(shortest.paths(g, v = a, to = b, 
+                                        mode = "in",
+                                        algorithm = "unweighted"))[paste(a), paste(b)]
   is.finite(sp)
 }
 
-getConnectingNodes <- function(g, v1, v2){
+#' Find All Vertices or Edges on Paths Connecting Two Vertices    
+#' 
+#' Given two vertices, find all vertices lying on all paths between those two 
+#' vertices.
+#' 
+#' @param g igraph object
+#' @param src vertex index of class numeric or igraph.vs, starting vertex
+#' @param trg vertex index of class numeric or igraph.vs, ending vertex
+#' @return numeric vertex indices, including the src and trg indices
+#' @export
+getConnectingNodes <- function(g, src, trg){
+  v1 <- checkVertex(src)
+  v2 <- checkVertex(trg)
   v1.downstream.nodes.except.v2 <- setdiff(getDownstreamNodes(g, v1), v2)
   downstream.nodes.upstream.to.v2 <- NULL
   if(length(v1.downstream.nodes.except.v2) > 0){
-    downstream.nodes.upstream.to.v2 <- v1.downstream.nodes.except.v2[sapply(v1.downstream.nodes.except.v2, function(node) 
-      edge.connectivity(g, node, v2) > 0)]
+    bool <- sapply(v1.downstream.nodes.except.v2, function(node){
+      edge.connectivity(g, node, v2) > 0
+    })
+    downstream.nodes.upstream.to.v2 <- v1.downstream.nodes.except.v2[bool]
   }
   c(v1, downstream.nodes.upstream.to.v2, v2)
 }
+#' @rdname getConnectingNodes
 getConnectingEdges <- function(g, src, trg){
+  src <- checkVertex(src)
+  trg <- checkVertex(trg)
   output.edges <- NULL
   if(V(g)[trg] != V(g)[src]){
     if(!(trg %in% getDownstreamNodes(g, src))) {
       stop("Target is not downstream of the source.")
     }
     v.set <- getConnectingNodes(g, src, trg)
-    output.edges <- E(g)[v.set %->% v.set]
+    output.edges <- E(g)[v.set %->% v.set] 
   }
-  output.edges
-}
-
-getDependentEdges <- function(g, e){
-  #Determine the edges in g whose weights impact the 
-  #optimization of the weight of edge e
-  v.trg <- get.edgelist(g)[e, 2]
-  output.v <- V(g)[type == "output"]
-  dependent.edges <- NULL
-  if(!(v.trg == output.v)){
-    if(output.v %in% ichildren(g, v.trg)) {
-      dependent.edges <- E(g)[v.trg %->% output.v]
-    }else{
-      dependent.edges <- getConnectingEdges(g, v.trg, output.v)
-    }
-  }
-  dependent.edges
+  as.numeric(output.edges)
 }
 
 randomWalk <- function(g, starts, r = 0, use.weights = F){

@@ -1,11 +1,11 @@
 context("Graph Operations")
 test_that("getUpstreamNodes errors out on an undirected graph.", {
   g0 <-  erdos.renyi.game(100, 1/10, directed = FALSE, loops = FALSE) %>% nameVertices
-  expect_error(getUpstreamNodes(g0, V(g0)[5]$name), "Graph must be directed.")
+  expect_error(getUpstreamNodes(g0, V(g0)[5]), "Graph must be directed.")
 })
 g <- ba.game(30) %>% nameVertices
-w <- V(g)$name[degree(g, mode = "in") > 0] %>%
-  intersect(V(g)$name[degree(g, mode = "out") > 0]) %>%
+w <- V(g)[degree(g, mode = "in") > 0] %>%
+  intersect(V(g)[degree(g, mode = "out") > 0]) %>%
   `[`(1)
 upstream <- getUpstreamNodes(g, w)
 downstream <- getDownstreamNodes(g, w)

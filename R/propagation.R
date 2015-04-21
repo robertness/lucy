@@ -1,13 +1,13 @@
-# Temporary measure to make sure only workings with names.  
-# Will expand later to make sure that names, numeric indices, or igraph.es/igraph.vs all work.
-checkNames <- function(obj){
-  if(class(obj) != "character") stop("Only indexing with character names at this time.")
+checkIndex <- function(object){
+  if(!(class(object) %in% c("integer","numeric", "igraph.vs", "igraph.es"))){
+    stop("Refer to edges/vertices with an integer, numeric, or igraph iterators")
+  } 
 }
 
 #' Check if updated attribute is present
 #' 
 #' @param g igraph graph object
-checkAttributes <- function(g){
+checkAttributes <- function(g, S){
   check.null <- is.null(S(g)$updated)  || is.null(S(g)$name)
   if(check.null) stop("Either 'name' or 'updated' attribute missing.")
 }
@@ -19,14 +19,20 @@ checkAttributes <- function(g){
 #' @param iterator either "edge", or "vertex"
 #' @return A function that updates edges (S = E) or vertices (S = V)
 getUpdater <- function(iterator){
-  setIterator(iterator)
-  updater <- function(g, obj, getDeterminers, callback){
-    checkNames(obj)  #Temporary measure to enforce indexing by name
-    checkAttributes(g)
-    if(!S(g)[obj]$updated){ #'S' is either E or V, set by setIterator()
-      determiners <- getDeterminers(g, obj)
+  rec.level <- 0
+  updater <- function(g, object, getDeterminers, callback){
+    checkIndex(object)
+    S <- ifelse(iterator == "edge", igraph::E, igraph::V)
+    `S<-` <- ifelse(iterator == "edge", igraph::`E<-`, igraph::`V<-`)
+    checkAttributes(g, S)
+    iterator <- ifelse(length(formals(S)) == 4, "edge", "vertex") # for debugging purposes, can delete
+    #message("#", rec.level, " level recursion for ", iterator, " updater")
+    rec.level <<- rec.level + 1
+    if(length(S(g)[object]$updated) == 0) browser()
+    if(!(S(g)[object]$updated)){ #'S' is either E or V, set by setIterator()
+      determiners <- getDeterminers(g, object)
       if(length(determiners) > 0){
-        test.determiners.unupdated <- !S(g)[determiners]$updated
+        test.determiners.unupdated <- !S(g)[S(g) %in% determiners]$updated
         if(any(test.determiners.unupdated)){
           unupdated.determiners <- determiners[test.determiners.unupdated]
           for(d in unupdated.determiners){
@@ -34,14 +40,16 @@ getUpdater <- function(iterator){
           }
         }
       }
-      g <- callback(g, obj)
+      g <- callback(g, object)
       if(!is.igraph(g)) stop("Your callback needs to return a valid igraph object.")
-      S(g)[obj]$updated <- TRUE
+      S(g)[object]$updated <- TRUE
     }
+    rec.level <<- 0
     g
   }
   updater
 }
+
 #' Traversal for Propogation
 #' 
 #' This closure creates a function that traverses the graph, applying the updater as it travels.
@@ -50,9 +58,12 @@ getUpdater <- function(iterator){
 #' E if traversing over edges, or V if traversing over vertices
 getTraverser <- function(iterator){
   traverser <- function(g, getDeterminers, callback){
+    S <- ifelse(iterator == "edge", igraph::E, igraph::V)
+    `S<-` <- ifelse(iterator == "edge", igraph::`E<-`, igraph::`V<-`)
+    #setIterator(iterator)
     updater <- getUpdater(iterator)
-    for(obj.name in S(g)$name){
-      g <- updater(g, obj.name, getDeterminers, callback) 
+    for(object in S(g)){
+      g <- updater(g, object, getDeterminers, callback) 
     }
     if(!all(S(g)$updated)){
       warning("The following were not updated: ", 
@@ -103,5 +114,6 @@ getOrdering <- function(g, S, traversal = "depth.first"){
                               unreachable = TRUE, 
                               order = TRUE)$order)[[traversal]]
 }
+
 
 

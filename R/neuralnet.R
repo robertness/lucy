@@ -1,6 +1,7 @@
 library(igraph)
 
-rescale.df <- function(df){
+#' Rescale the column of a data frame to between 0 and 1
+rescaleDf <- function(df){
   output.list <- lapply(df, function(col){
     x.max <- max(col)
     x.min <- min(col)
@@ -15,12 +16,13 @@ rescale.df <- function(df){
   list(df = new.df, min.max = min.max.list)
 }
 
+
 formatVertexList <- function(output){
   if(is.list(output)){
     if(length(output) > 1){
       output.list.item <- as.data.frame(do.call("cbind", lapply(output, head)))
       if(ncol(output.list.item) == vcount(g)){
-        names(output.list.item) <- V(g)$name
+        names(output.list.item) <- V(g)
       }
       output <- list(output.list.item)
     } else {
@@ -30,19 +32,30 @@ formatVertexList <- function(output){
   output
 }
 
+#' Summarize the values of an igraph neural net model 
 examineFFGraph <- function(g, formatVertexAttr = formatVertexList){
   examineGraph(g, formatVertexAttr=formatVertexAttr)
 }
 
+#' The Logistic Function and Its Derivative
+#' @export
 logistic <- function(z) 1 / (1 + exp(-z))
+#' @rdname logistic
 logistic.prime <- function(z) exp(-z)/(1+exp(-z))^2
 
+#' Calculate the Values of Vertices in Neural Network Model
+#' 
+#' For a given vertex, input and the output signals are calculated.
+#' 
+#' @param g, the graph model
+#' @param v.index, the index of a vertex
+#' @return an updated graph model
 calculateVals <- function(g, v.index){
   v <- V(g)[v.index]
   v.parents <- iparents(g, v)
   if(length(v.parents) == 0) stop("Attempting apply activation function
                                   to a node without parents.")
-  parent.val.mat <- do.call("cbind", v.parents$output.signal)
+  parent.val.mat <- do.call("cbind", V(g)[v.parents]$output.signal)
   weights <- matrix(E(g)[to(v)]$weight, ncol=1)
   linear.combination <- as.numeric(parent.val.mat %*% weights)
   V(g)[v]$input.signal <- list(linear.combination)
@@ -52,6 +65,11 @@ calculateVals <- function(g, v.index){
   g
 }
 
+#' Reset Model Attributes
+#' 
+#' Resets the attributes of a model, after some of the attributes have been updated.
+#' @param g a model
+#' @return A model with updated attributes reset to FALSE
 resetUpdateAttributes <- function(g){
   V(g)$updated <- FALSE
   E(g)$updated <- FALSE
@@ -59,17 +77,12 @@ resetUpdateAttributes <- function(g){
   g
 }
 
-getEdgeVertex <- function(g, e, node = c("src", "trg")){
-  el <- get.edgelist(g)
-  colnames(el) <- c("src", "trg")
-  V(g)[el[e, node]]
-}
-
+#' Add Nodes Corresponding to Biases
 addInterceptNodes <- function(g){
   non.input.nodes <- V(g)[inDegree(g, V(g)) != 0]
   g.new <- g
   for(v in non.input.nodes){
-    v.name <- V(g)[v]$name
+    v.name <- V(g)[v]
     intercept.name <- paste("int", v.name, sep=".")
     g.new <- g.new + intercept.name
     g.new <- initializeVertexVectors(g.new, intercept.name)
@@ -80,8 +93,13 @@ addInterceptNodes <- function(g){
   g.new
 }
 
+#' Initialize Numerically-Valued Vertex Attributes
+#' For a given vertex, vertex attibutes that take a vector as a value are 
+#' initialized with a placeholder.
+#' @param g graph model
+#' @param v.index vertex index
+#' @return graph object with placeholders for numerically-valued vertex attributes
 initializeVertexVectors <- function(g, v.index){
-  #For a given vertex, vertex attibutes that take a vector as a value are initialized with a placeholder
   na.placeholder <- list(rep(NA, g$n)) # A list containing one vector of NAs used to initialize vertex attributes that are vectors
   V(g)[v.index]$input.signal <- na.placeholder
   V(g)[v.index]$f.prime.input <- na.placeholder
@@ -90,9 +108,17 @@ initializeVertexVectors <- function(g, v.index){
   g
 }
 
+#' Primes a Graph Object for Fitting a Neural Network Model
+#' @param g igraph object with vertices corresponding to input nodes, output nodes, and 
+#' hidden nodes.
+#' @param input.table data frame of the input values
+#' @param output.table data frame of the output values
+#' @param activation function, the desired activation function
+#' @param activation.prime, the Derivative of the desired activation function
+#' @param min.max.constraints (optional) numeric containing the limiting range of the estimates
+#' @return A graph with all the attributes needed to fit the neural network model.
 initializeGraph <- function(g, input.table, output.table, activation=logistic, 
                             activation.prime=logistic.prime, min.max.constraints=NULL){
-  require(igraph)
   g$activation <- activation
   g$activation.prime <- activation.prime
   if(!is.null(min.max.constraints)) names(min.max.constraints) <- c("min", "max")
@@ -113,8 +139,8 @@ initializeGraph <- function(g, input.table, output.table, activation=logistic,
   for(output in names(output.table)){
     V(g)[output]$observed <- list(output.table[, output])
   }
-  #Name edges
-  E(g)$name <- nameEdges(g, E(g))
+  #Reinitialize names
+  g <- nameEdges(g)
   #initialize weights
   E(g)$weight <- runif(ecount(g))
   ##V(g)$intercept <- runif(vcount(g))
@@ -123,24 +149,21 @@ initializeGraph <- function(g, input.table, output.table, activation=logistic,
   g
 }
 
-
+#' A Simple Matrix Multiplication to Calculate Linear Inputs
 getLinearCombination <- function(weights, model.mat) as.numeric(model.mat %*% weights)
 
+#' Calculates the Derivative of a Node's Output Signal w.r.t a Weight.
+#' @param g a model
+#' @param v vertex index 
+#' @param e edge index
+#' @return a vector corresponding to the Derivative
 doChainRule <- function(g, v, e){
-  #calculates the derivitive of a nodes output signal with to a weight.
-  #g is the graph
-  #The derivitive of the output of v is being calculated w.r.t the weight on e
-  #s is the source node of the edge that has the weight in question as an attribute
-  
-  #first error check that v is indeed downstream of e
-  message("Chain rule: derivative of node ", v$name, " w.r.t ", e$name)
   e.src <- getEdgeVertex(g, e, "src")
-  if(v == e.src) stop("The chainrule has gone back too far, v: ", v$name, " e: ", e$name)
+  if(v == e.src) stop("The chainrule has gone back too far, v: ", v, " e: ", e)
   e.trg <- getEdgeVertex(g, e, "trg")
-  
   if(!(e.trg %in%  v || isBDownstreamOfA(g, a = e.trg, b = v))){
     stop("You've attempted to find the gradient of a node's output
-         w.r.t an edge weight that that does not affect that output. v: ", v$name, " e: ", e$name)  
+         w.r.t an edge weight that that does not affect that output. v: ", v, " e: ", e)  
   }
   f.prime.input <- unlist(V(g)[v]$f.prime.input)
   #Next check that the edge is not an incoming edge to v
@@ -150,12 +173,12 @@ doChainRule <- function(g, v, e){
   }else{
     connected.nodes <- V(g)[getConnectingNodes(g, e.trg, v)]
     varying.parents <- V(g)[intersect(iparents(g, v), connected.nodes)]
-    parent.names <- varying.parents$name
+    parent.names <- paste(varying.parents)
     v.parents.chain.rule.result <- matrix(NA, nrow = g$n, ncol = length(varying.parents), 
                                          dimnames = list(NULL, parent.names))
     for(v.parent.index in varying.parents){
       v.parent <- V(g)[v.parent.index]
-      v.parents.chain.rule.result[, v.parent$name] <- doChainRule(g, v.parent, e)
+      v.parents.chain.rule.result[, paste(v.parent)] <- doChainRule(g, v.parent, e)
     }
     output <- rowSums(
       apply(v.parents.chain.rule.result, 2, function(parent.result){
@@ -163,12 +186,12 @@ doChainRule <- function(g, v, e){
       })
     )
   }
-  message("Completed chainrule calculation for node ", v$name, " w.r.t edge ", e$name)
+  #message("Completed chainrule calculation for node ", v, " w.r.t edge ", e)
   if(!is.numeric(output)){
     stop("v: ", 
-         V(g)[v]$name, 
+         V(g)[v], 
          ", e: ", 
-         nameEdges(g, e), " output: ", 
+         E(g)[e], " output: ", 
          paste(round(head(output), 2), collapse=" "), 
          ", fpi: ", 
          paste(round(head(f.prime.input), 2), collapse=" ")
@@ -187,7 +210,7 @@ plotPath <- function(g, src, trg){
     v.set <- getConnectingNodes(g, src, trg)
     e.set <- E(g)[v.set %->% v.set]
     h.edges <- get.edgelist(g)[e.set, ]
-    node.names <- V(g)[c(src, trg)]$name
+    node.names <- V(g)[c(src, trg)]
     h.list <- list(nodes = node.names, arcs = h.edges, col = "red")
     plot.args <- list(highlight = h.list, main = paste(node.names, collapse = " to "))
     igraphGraphvizPlot(g, plot.args = plot.args)
@@ -201,7 +224,7 @@ plotPath <- function(g, src, trg){
 # plotPath(g, v1, v2)
 
 getPrediction <- function(g, v, weights){
-  message("Prediction function call: candidate weights being propagated forward.")
+  #message("Prediction function call: candidate weights being propagated forward.")
   prediction.graph <- g
   E(prediction.graph)[to(v)]$weight <- weights
   prediction.graph <- updateVertices(prediction.graph, getDeterminers = iparents, callback = calculateVals)
@@ -219,7 +242,6 @@ getLossFunction <- function(g, v){
   #Creating a temporary graph where new weights for v are added, the values are propagated forward.
   #And a new prediction is generated
   lossFunction <- function(weights){
-    message("Loss function call")
     prediction <- getPrediction(g, v, weights)
     observed <- unlist(V(g)[type=="output"]$observed)
     sum(.5 * (observed - prediction) ^ 2)
@@ -234,11 +256,10 @@ getGradientFunction <- function(g, v){
   # edge for each node are optimized together
   # 1) Get the parents and parent matrices
   v.incoming.edges <- E(g)[to(v)]
-  edge.names <- v.incoming.edges$name
+  edge.names <- paste(v.incoming.edges)
   incoming.edge.count <- length(v.incoming.edges)
   output.node <- V(g)[type=="output"]
   gradientFunction <- function(weights){
-    message("A gradient function call was made.")
     #Calculates the gradient for a set of weights using the doChainRule function
     prediction <- getPrediction(g, v, weights)
     observed <- unlist(output.node$observed)
@@ -246,7 +267,7 @@ getGradientFunction <- function(g, v){
     chain.rule.output <- matrix(NA, nrow = g$n, ncol = incoming.edge.count, dimnames = list(NULL, edge.names))
     for(e.index in v.incoming.edges){
       e <- E(g)[e.index]
-      chain.rule.output[, e$name] <- doChainRule(g, output.node, e)
+      chain.rule.output[, paste(e)] <- doChainRule(g, output.node, e)
     }
     gradient.output <- colSums(
       apply(chain.rule.output, 2, function(chain.rule.result){
@@ -275,7 +296,6 @@ getOptimizationFunction <- function(g, lossFunction, getGradient){
   optimFunction
 }
 
-
 fitWeightsForNode <- function(g, v){
   v <- V(g)[v]
   lossFunction <- getLossFunction(g, v)
@@ -288,7 +308,7 @@ fitWeightsForNode <- function(g, v){
 }
 
 fitWeightsForEdgeTarget <- function(g, e){
-  edge.target <- get.edgelist(g)[e, 2] 
+  edge.target <- get.edgelist(g)[e, 2]
   g <- fitWeightsForNode(g, edge.target)
   E(g)[e]$updated <- TRUE
   g
@@ -296,7 +316,6 @@ fitWeightsForEdgeTarget <- function(g, e){
 
 fitInitializedNetwork <- function(g, epsilon, min.iter, verbose=F){
   e <- getLoss(g)
-  print(e)
   i <- 1
   test <- TRUE
   while(test || i <= min.iter){
@@ -307,7 +326,6 @@ fitInitializedNetwork <- function(g, epsilon, min.iter, verbose=F){
     }
     g <- updateVertices(g, getDeterminers = iparents, callback = calculateVals)
     e.new <- getLoss(g)
-    print(e.new)
     test <- e - e.new > epsilon
     i <- i + 1
     e <- e.new
@@ -333,8 +351,8 @@ simFarceNet <- function(n){
   #This is for testing purposes.
   
   g <- generateMultiConnectedDAG(n)
-  inputs <- V(g)[igraph::degree(g, mode="in") == 0]$name
-  outputs <- V(g)[igraph::degree(g, mode="out") == 0]$name
+  inputs <- V(g)[igraph::degree(g, mode="in") == 0]
+  outputs <- V(g)[igraph::degree(g, mode="out") == 0]
   input.val.list <- lapply(inputs, function(input) runif(1000))
   input.df <- data.frame(input.val.list)
   names(input.df) <- inputs
@@ -344,7 +362,7 @@ simFarceNet <- function(n){
   g <- initializeGraph(g, input.table = input.df, 
                        output.table = output.df)
   V(g)[type == "output"]$observed <- V(g)[type == "output"]$output.signal
-  output.df[, outputs] <- unlist(V(g)[type == "output"]$observed )
+  output.df[, paste(outputs)] <- unlist(V(g)[type == "output"]$observed)
   g <- fitInitializedNetwork(g, .05, 3)
   g
 }
@@ -364,7 +382,7 @@ newDataUpdate <- function(g, input.table){
 
 getDF <- function(g){
   output <- do.call(data.frame, V(g)[type != "intercept"]$output.signal)
-  names(output) <- V(g)[type != "intercept"]$name
+  names(output) <- paste(V(g)[type != "intercept"])
   output
 }
 
@@ -393,4 +411,21 @@ fixNodes <- function(g, v.set, val){
   setValCallback <- setValuesFunc(val)
   g <- updateVertices(g, getDeterminers = getCauses, callback = setValCallback)
   g
+}
+
+getDependentEdges <- function(g, e){
+  #Determine the edges in g whose weights impact the 
+  #optimization of the weight of edge e 
+  e <- E(g)[ e]
+  v.trg <- get.edgelist(g)[e, 2] %>% as.numeric
+  output.v <- V(g)[type == "output"] %>% as.numeric
+  dependent.edges <- NULL
+  if(!(v.trg == output.v)){
+    if(output.v %in% ichildren(g, v.trg)) {
+      dependent.edges <- E(g)[v.trg %->% output.v]
+    }else{
+      dependent.edges <- getConnectingEdges(g, v.trg, output.v)
+    }
+  }
+  dependent.edges
 }

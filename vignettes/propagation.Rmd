@@ -181,7 +181,7 @@ round(propagation.prediction, 2)
 ```
 
 ## Back-propagation on a Multi-layer Perceptron
-*Coming soon*
+
 
 ```{r}
 #Split the data into training and test data
@@ -206,8 +206,10 @@ neuralnet::compute(net.infert, dplyr::select(infert.split$test,
 ```
  
 ```{r} 
-inputs
-wts <- net.infert$weights[[1]]
+inputs <- c("parity", "induced", "spontaneous")
+outputs <- c("case")
+input.table <- dplyr::select(infert.split$test, 
+                                             parity, induced, spontaneous)
 input.layer <- c("bias0", inputs)
 l1 <- c("bias1", paste("L1", 1:3, sep=""))
 l2 <- c("bias2", paste("L2", 1:5, sep =""))
@@ -218,15 +220,8 @@ g <- rbind(expand.grid(input.layer, l1),
       expand.grid(l3, "case")) %>%
   as.data.frame %>%
   graph.data.frame
-#Values
-n <- nrow(infert.split$test)
-V(g)$value <- list(rep(NA, n))
-V(g)[inputs]$value <- as.list(dplyr::select(infert.split$test, 
-                                             parity, induced, spontaneous))
-V(g)[grepl("bias", V(g)$name)]$value <- list(rep(1, n)) 
-#FALSE
-E(g)$updated <- FALSE
-V(g)[c(inputs, "bias1", "bias2")]$updated <- TRUE
+g <- fitNetwork(g)
+
 ```
 
 
