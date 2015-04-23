@@ -123,7 +123,7 @@ nameVertices <- function(g, v.set = V(g)){
   V(g)[v.set]$name <- paste(V(g)[v.set])
   g
 }
-#' @rdname nameEdges
+#' @rdname nameVertices
 nameEdges <- function(g, e.set = E(g)){
     el <- get.edgelist(g)
     E(g)[e.set]$name <- apply(el[e.set, , drop=F], 1 , paste, collapse="->") 
