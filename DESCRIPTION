@@ -1,6 +1,6 @@
 Package: igraphr
 Type: Package
-Title: Adds common graph operations to R igraph that makes graph manipulation via igraph simpler and easier to do. 
+Title: Useful graph operations and visualizations for igraph. 
 Version: 0.1
 Author: Robert Ness
 Description: igraphr creates higher level graph operations build upon the basic graph data 
