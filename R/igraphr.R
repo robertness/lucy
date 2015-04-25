@@ -34,30 +34,34 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
 getDownstreamNodes <- function(g, w){
   w <- checkVertex(w)
   if(!is.directed(g)) stop("Graph must be directed.")
+  g <- nameVertices(g)
   sp.mat <- shortest.paths(g, v = V(g), to = w, mode = "in") 
   if(is.null(dimnames(sp.mat))){
     dimnames(sp.mat) <- list(paste(1:vcount(g)), paste(w))
   }
-  sp.mat[, paste(w)] %>% #Get the shortest path vector for all that have 
+  sp.mat[, V(g)[w]$name] %>% #Get the shortest path vector for all that have 
     Filter(f=is.finite) %>% #Keep online the finite length paths 
     names %>% # collect their nanmes
-    as.numeric %>%
+    {V(g)[.]} %>% # convert to vertex objects
+    as.numeric %>% # convert to numeric
     setdiff(w) # exclude the source node itself
 }
 #' @rdname getDownstreamNodes
 getUpstreamNodes <- function(g, w){
   w <- checkVertex(w)
   if(!is.directed(g)) stop("Graph must be directed.")
+  g <- nameVertices(g)
   sp.mat <- shortest.paths(g, v = V(g), to = w, mode = "out") 
   if(is.null(dimnames(sp.mat))){
     dimnames(sp.mat) <- list(paste(1:vcount(g)), paste(w))
   }
-  sp.mat[, paste(w)] %>%
+  sp.mat[, V(g)[w]$name] %>%
   #Get the shortest path vector for all that have 
     #paths coming into w
     Filter(f=is.finite) %>% #Keep online the finite length paths 
     names %>% # collect their nanmes
-    as.numeric %>%
+    {V(g)[.]} %>% # convert to vertex objects
+    as.numeric %>% # convert to numeric
     setdiff(w) # exclude the source node itself
 }
 
