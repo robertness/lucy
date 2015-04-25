@@ -28,7 +28,7 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
 #' Find all Vertices Upstream or Downstream of a Given Vertex in Directed Graph  
 #' 
 #' @param g igraph object
-#' @param v character, the name of a vertex in g
+#' @param w character, the name of a vertex in g
 #' @return character vector of vertex names.
 #' @export
 getDownstreamNodes <- function(g, w){
@@ -75,9 +75,10 @@ getUpstreamNodes <- function(g, w){
 isBDownstreamOfA <- function(g, a, b){
   a <- checkVertex(a)
   b <- checkVertex(b)
+  g <- nameVertices(g)
   sp <- suppressWarnings(shortest.paths(g, v = a, to = b, 
                        mode = "out",
-                       algorithm = "unweighted"))[paste(a), paste(b)]
+                       algorithm = "unweighted"))[V(g)[a]$name, V(g)[b]$name]
   is.finite(sp)
 }
 #' @rdname getConnectingNodes
