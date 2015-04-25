@@ -1,25 +1,21 @@
-#' igraph DAG plotting with graphviz library
+#' igraph plotting with Graphviz library
 #' 
-#' The default layout for DAGs (directed acyclic graphs) in the graphviz library  is more 
-#' interpretable than with igraph layouts,especially when the DAGs are densely connected.
-#' 
-#' In the current implementation, the bnlearn package is used as an intermediary, as it will
-#' automatically check if the graph is a DAG.
-#' @param g a DAG igraph object.
-#' @param plot.args arguments for \code{bnlearn::graphviz.plot()}
+#' A simple plotter of igrpah objects with RGraphviz.  Nodes are labeled by 
+#' their vertex names.  For more complicated graphing is need, use Graphviz 
+#' directly. 
+
+#' @param g an igraph object.
 #' @return graphviz.plot returns invisibly the graph object produced by Rgraphviz.
 #' @examples
 #' g <- ba.game(20)
-#' igraphVizPlot(g)
+#' igraphviz(g)
 #' g <- layerDAGs(3, 4)
-#' igraphVizPlot(g)
-igraphVizPlot <- function(g, plot.args=NULL){
+#' igraphviz(g)
+#' @export
+igraphviz <- function(g){
+  if(!requireNamespace("Rgraphviz", quietly = TRUE)) "RGraphviz not attached."
   g <- nameVertices(g)
-  net <- bnlearn::empty.graph(V(g)$name)
-  bnlearn::arcs(net) <- get.edgelist(g)
-  args <- c(list(x = net), plot.args)
-  if(!requireNamespace("bnlearn", quietly = TRUE)) "bnlearn not attached. 
-                                                    Try library(bnlearn) first."
-  do.call("graphviz.plot", args)
+  gnell <- g %>% igraph.to.graphNEL %>% layoutGraph
+  layoutGraph(gnell, nodeAttrs=list(label=structure(V(g)$name, names=V(g)$name)))
+  renderGraph(gnell)
 }
-

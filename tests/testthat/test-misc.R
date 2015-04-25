@@ -51,11 +51,11 @@ test_that("All functions edges/vertices on iterators take an numeric
               outDegree(g, v) %>%
                 identical(structure(23, names = "21")) %>%
                 expect_true
-              V(nameVertices(g, v.set = v))[v] %>%
+              V(nameVertices(g))[v] %>%
                 as.numeric %>%
                 identical(21) %>%
                 expect_true
-              E(nameEdges(g, e.set = E(g)[to(v)]))[to(v)] %>%
+              E(nameEdges(g))[to(v)] %>%
                 as.numeric %>%
                 identical(c(11, 32, 46, 63,  89, 110, 130,236, 275)) %>%
                 expect_true
@@ -100,11 +100,11 @@ test_that("All functions that return edges or vertices return numerics",{
   outDegree(g, v) %>%
     identical(structure(23, names = "21")) %>%
     expect_true
-  V(nameVertices(g, v.set = v))[v] %>%
+  V(nameVertices(g))[v] %>%
     as.numeric %>%
     identical(21) %>%
     expect_true
-  E(nameEdges(g, e.set = E(g)[to(v)]))[to(v)] %>%
+  E(nameEdges(g))[to(v)] %>%
     as.numeric %>%
     identical(c(11, 32, 46, 63,  89, 110, 130,236, 275)) %>%
     expect_true

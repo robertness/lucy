@@ -5,22 +5,19 @@
 \alias{nameVertices}
 \title{Quick Naming of the Vertices/Edges in a Graph}
 \usage{
-nameVertices(g, v.set = V(g))
+nameVertices(g)
 
-nameEdges(g, e.set = E(g))
+nameEdges(g)
 }
 \arguments{
 \item{g}{an igraph directed graph}
-
-\item{v.set}{indices for the vertices that are to be named}
-
-\item{e.set}{indices for the edges that that are to be named}
 }
 \value{
-chacter vector of vertex names
+the graph with the vertex attribute 'name'
 }
 \description{
-Quickly add a name attribute to the vertices or edges in the graph.
-For vertices the name is the vertex id, the edges it is 'from->to'.
+If the vertex/edges of an igraph object have no name, quickly add a name
+based on the vertex index/vertices in the edge. For vertices the name is the
+vertex id, the edges it is 'from->to'.
 }
 

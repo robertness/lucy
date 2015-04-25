@@ -1,8 +1,49 @@
 #' Generate a Multilayer Perceptron Graph 
 #' 
-#' Generate a directed graph structure like a multi-layer perceptron
-#' 
-generateMLP <- function(...){} 
+#' Generate a multi-layer perceptron graph structure.
+#' @usage mlpgraph(inputs, layers, outputs)
+#' @param inputs character, the names of the input nodes
+#' @param layers a vector of integers specifying the number of hidden neurons (vertices) in each hidden layer
+#' @param outputs character, the names of the output nodes
+#' @return igraph object, a structure with an input layer, an output layer and 
+#' hidden layers in between.  Each node is named.  The graph has a vertex 
+#' attribute called "layer" that describes whether it is an input, output, or
+#' hidden layer node.
+#' @examples
+#' g <- mlpgraph(c("I1", "I2"), c(3, 2, 4), c("O1", "O2", "O3"))
+#' igraphviz(g)
+#' @export
+mlpgraph <- function(inputs, layers, outputs){
+  # Make a list of all the layers
+  layer_list <- seq_along(layers) %>% # 
+    {paste("H", ., sep="")} %>%
+    {Map(rep, ., layers)} %>%
+    lapply(function(item) paste(item, 1:length(item), sep = ""))
+  # Check name conflicts
+  conflicts <- intersect(c(inputs, outputs), unlist(layer_list))
+  if(length(conflicts) > 0) stop("Names of the inputs or outputs conflict with name of hidden nodes.")
+  # Create and label a list of data 
+  vertex_table <- layer_list %>%
+    names %>%
+    lapply(function(layer) cbind(v = layer_list[[layer]], layer)) %>%
+    {do.call("rbind", .)} %>%
+    {rbind(
+      cbind(v = inputs, layer = "input"),
+      .,
+      cbind(v = outputs, layer = "output")
+    )} %>% data.frame
+  g <- layer_list %>%
+    {c(list(inputs = inputs), ., list(outputs = outputs))} %>%
+    {lapply(2:length(.), function(i){
+      .[c(i - 1, i)]
+    })} %>%
+    lapply(expand.grid) %>%
+    {lapply(., function(item) {names(item) <- c("from", "to"); item})} %>%
+    {do.call("rbind", .)} %>%
+    graph.data.frame(directed = T, vertices = vertex_table)
+  g
+} 
+
 
 #' Generate Multi-connected DAG
 #' 

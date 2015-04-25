@@ -112,21 +112,24 @@ getLeaves <- function(g){
 
 #' Quick Naming of the Vertices/Edges in a Graph
 #' 
-#' Quickly add a name attribute to the vertices or edges in the graph.  
-#' For vertices the name is the vertex id, the edges it is 'from->to'. 
+#' If the vertex/edges of an igraph object have no name, quickly add a name 
+#' based on the vertex index/vertices in the edge. For vertices the name is the 
+#' vertex id, the edges it is 'from->to'. 
 #' 
 #' @param g an igraph directed graph
-#' @param v.set indices for the vertices that are to be named
-#' @param e.set indices for the edges that that are to be named
-#' @return chacter vector of vertex names
-nameVertices <- function(g, v.set = V(g)){
-  V(g)[v.set]$name <- paste(V(g)[v.set])
+#' @return the graph with the vertex attribute 'name'
+nameVertices <- function(g){
+  if(is.null(V(g)$name)){
+    V(g)$name <- paste(V(g))
+  }
   g
 }
 #' @rdname nameVertices
-nameEdges <- function(g, e.set = E(g)){
+nameEdges <- function(g){
+  if(is.null(E(g)$name)){
     el <- get.edgelist(g)
-    E(g)[e.set]$name <- apply(el[e.set, , drop=F], 1 , paste, collapse="->") 
+    E(g)$name <- apply(el, 1 , paste, collapse="->")
+  }  
   g
 }
 

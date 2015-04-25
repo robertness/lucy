@@ -22,7 +22,7 @@ igraph's ba.game function creates a scale-free network.
 
 ```{r, message=FALSE, eval=FALSE}
 g <- ba.game(20)
-igraphVizPlot(g)
+igraphviz(g)
 ```
 ![ba plot](http://i.imgur.com/Q8TeZY0l.png)
 
@@ -30,6 +30,6 @@ igraphr's layerDAGs function stacks layers of highly-connected DAGs on top of on
 
 ```{r, eval=FALSE}
 g <- layerDAGs(6, 3)
-igraphVizPlot(g)
+igraphviz(g)
 ```
 ![layerDags plot](https://i.imgur.com/c5sAQywl.png)

@@ -4,8 +4,8 @@ test_that("getUpstreamNodes errors out on an undirected graph.", {
   expect_error(getUpstreamNodes(g0, V(g0)[5]), "Graph must be directed.")
 })
 g <- ba.game(30) %>% nameVertices
-w <- V(g)[degree(g, mode = "in") > 0] %>%
-  intersect(V(g)[degree(g, mode = "out") > 0]) %>%
+w <- V(g)[igraph::degree(g, mode = "in") > 0] %>%
+  intersect(V(g)[igraph::degree(g, mode = "out") > 0]) %>%
   `[`(1)
 upstream <- getUpstreamNodes(g, w)
 downstream <- getDownstreamNodes(g, w)
