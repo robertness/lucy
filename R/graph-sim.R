@@ -10,10 +10,10 @@
 #' attribute called "layer" that describes whether it is an input, output, or
 #' hidden layer node.
 #' @examples
-#' g <- mlpgraph(c("I1", "I2"), c(3, 2, 4), c("O1", "O2", "O3"))
+#' g <- mlp_graph(c("I1", "I2"), c(3, 2, 4), c("O1", "O2", "O3"))
 #' igraphviz(g)
 #' @export
-mlpgraph <- function(inputs, outputs, layers = NULL){
+mlp_graph <- function(inputs, outputs, layers = NULL){
   if(!is.character(inputs) || !is.character(outputs)) stop("Use characters to label inputs and outputs.")
   conflicts <- intersect(inputs, outputs)
   if(length(conflicts) > 0) stop("There are inputs and outputs with the same name.")

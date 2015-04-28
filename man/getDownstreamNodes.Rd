@@ -12,7 +12,7 @@ getUpstreamNodes(g, w)
 \arguments{
 \item{g}{igraph object}
 
-\item{v}{character, the name of a vertex in g}
+\item{w}{character, the name of a vertex in g}
 }
 \value{
 character vector of vertex names.
