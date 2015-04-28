@@ -11,11 +11,15 @@ test_that("layered DAG flows from top to bottom.", {
     isBDownstreamOfA(g.fat, getRoots(g.fat)[1], getLeaves(g.fat)[1])
   )
 })
-test_that("mlpgeneration is robust", {
+test_that("mlp generation is robust", {
   #works with one layer
-  g <- mlpgraph("I1", 10, "O1")
+  g <- mlpgraph("I1", "O1", 10)
   (V(g)$layer %in% "H1") %>% sum %>% expect_equal(10)
   #Expect error if input or output name in the hidden nodes' names
-  expect_error(mlpgraph("H12", 4, "O1"),
+  expect_error(mlpgraph("H12", "O1", 4),
                "Names of the inputs or outputs conflict with name of hidden nodes.")
+})
+test_that("mlp generation works without hidden layers", {
+  g <- mlpgraph(paste(1:10), "Oout")
+  expect_true(ecount(g) == 10)
 })

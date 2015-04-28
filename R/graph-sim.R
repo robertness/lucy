@@ -13,8 +13,22 @@
 #' g <- mlpgraph(c("I1", "I2"), c(3, 2, 4), c("O1", "O2", "O3"))
 #' igraphviz(g)
 #' @export
-mlpgraph <- function(inputs, layers, outputs){
-  # Make a list of all the layers
+mlpgraph <- function(inputs, outputs, layers = NULL){
+  if(!is.character(inputs) || !is.character(outputs)) stop("Use characters to label inputs and outputs.")
+  conflicts <- intersect(inputs, outputs)
+  if(length(conflicts) > 0) stop("There are inputs and outputs with the same name.")
+  # If there are no hidden layers ...
+  if(is.null(layers)){    
+    vertex_table <- data.frame(v = c(inputs, outputs),
+                               layer = c(rep("input", length(inputs)),
+                                         rep("output", length(outputs)))
+    )
+    g <- list(inputs, outputs) %>%
+      expand.grid %>%
+      graph.data.frame(directed = T, vertices = vertex_table)
+    return(g) #and stop here
+  }
+  # Else, start by making a list of all the layers
   layer_list <- seq_along(layers) %>% # 
     {paste("H", ., sep="")} %>%
     {Map(rep, ., layers)} %>%
