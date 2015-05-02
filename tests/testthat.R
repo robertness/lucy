@@ -1,4 +1,4 @@
 library(testthat)
-library(igraphr)
+library(lucy)
 
-test_check("igraphr")
+test_check("lucy")

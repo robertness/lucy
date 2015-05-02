@@ -1,19 +1,17 @@
-Package: igraphr
+Package: lucy
 Type: Package
-Title: Useful graph operations and visualizations for igraph. 
+Title: Really useful things done with graphs. 
 Version: 0.1
 Author: Robert Ness
-Description: igraphr creates higher level graph operations build upon the basic graph data 
-             structure and graph operations found in igraph.  igraphr is useful to those 
-             who like using igraph as their primary tool for working with graph data 
-             structures, and is looking for some extended functionality, especially with more 
-             commonly used graph and tree search algorithms.
+Description: Lucy is for people who think about statistics and machine learning problems in terms of graphs.
+             The core data structure is the igraph object.  In addition to handy extentions to igraph functions and 
+             visualization of igraph objects, Lucy implements graph algorithms that are useful across various areas of 
+             statistics and machine learning.
 License: GPL-2
 Depends: R (>= 2.14),
          igraph (>= 0.7.1),
-         Rgraphviz,
          magrittr
-Imports: bnlearn
+Imports: Rgraphviz
 Suggests: knitr,
     testthat
 VignetteBuilder: knitr

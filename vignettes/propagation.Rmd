@@ -1,5 +1,5 @@
 <!--
-  %\VignetteIndexEntry{More igraph visualization with igraphr}
+  %\VignetteIndexEntry{Graph Propagation with Lucy}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 -->
@@ -22,7 +22,7 @@ Examples of this type of systematic update includes:
 
 When variables are vertices/nodes (I use the terms interchangebly) or edges in a graph, then a change to the state of one object "propagates" through the rest of the graph.
 
-igraphr builds the basis for such propogations using igraph.
+lucy builds the basis for such propogations using igraph.
 
 Propagation is done with one of either two functions, *updateVertices* or *updateEdges*, which predictably do propagation on edges or on vertices.  Each take an igraph object as an argument, as well as two other key arguments; functions "getDeterminers" and "callback".  
 
@@ -32,7 +32,7 @@ Propagation is done with one of either two functions, *updateVertices* or *updat
 library(plyr, quietly = T)
 library(dplyr, quietly = T)
 library(reshape, quietly = T)
-library(igraphr, quietly = T)
+library(lucy, quietly = T)
 library(bnlearn, quietly = T)
 library(magrittr, quietly = T)
 ```
@@ -163,7 +163,7 @@ calculateNode <- function(g, v){
 }
 ```
 
-Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  This function exists in *igraphr*, it is *iparents*.
+Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  This function exists in *lucy*, it is *iparents*.
 
 Now we are ready for the propagation of values across the vertices.
 

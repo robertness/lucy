@@ -13,7 +13,7 @@
 #' igraphviz(g)
 #' @export
 igraphviz <- function(g){
-  if(!requireNamespace("Rgraphviz", quietly = TRUE)) "RGraphviz not attached."
+  if(!requireNamespace("Rgraphviz", quietly = TRUE)) "Load RGraphviz first."
   g <- nameVertices(g)
   gnell <- g %>% igraph.to.graphNEL %>% layoutGraph
   layoutGraph(gnell, nodeAttrs=list(label=structure(V(g)$name, names=V(g)$name)))
@@ -31,7 +31,7 @@ igraphviz <- function(g){
 #' plot_path(g, 4, 11)
 #' @export
 plot_path <- function(g, src, trg){
-  requireNamespace("Rgraphviz")
+  if(!requireNamespace("Rgraphviz", quietly = TRUE)) "Load RGraphviz first."
   if(!(trg %in% getDownstreamNodes(g, src))) stop("Target is not downstream of the source.")
   node_list <- {rep("green", 2)} %>% 
     structure(names = V(g)[c(src, trg)]$name) %>%

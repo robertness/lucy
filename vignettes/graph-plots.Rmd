@@ -1,14 +1,14 @@
 <!--
-  %\VignetteIndexEntry{More igraph visualization with igraphr}
+  %\VignetteIndexEntry{More igraph visualization with Lucy}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 -->
 
-# Useful visualizations using igraphr
+# Useful visualizations using lucy
 
 ```{r, message=FALSE}
-#devtools::install_github("osazuwa223/igraphr")
-library(igraphr)
+#devtools::install_github("osazuwa223/lucy")
+library(lucy)
 set.seed(20)
 ```
 
@@ -20,7 +20,7 @@ The [*Rgraphviz*](http://www.bioconductor.org/packages/release/bioc/html/Rgraphv
 igraphviz(ba.game(10))
 ```
 
-Rgraphviz is especially useful in the case when there is a hierarchy between graph vertices that can be illustrated with a top-down ordering in the layout.   For example, igraphr's *layerDAGs* function stacks layers of highly-connected directed acyclic graphs on top of one another. 
+Rgraphviz is especially useful in the case when there is a hierarchy between graph vertices that can be illustrated with a top-down ordering in the layout.   For example, lucy's *layerDAGs* function stacks layers of highly-connected directed acyclic graphs on top of one another. 
 
 ```{r}
 g <- layerDAGs(6, 3)

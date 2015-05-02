@@ -136,7 +136,8 @@ test_that("method mirrors neural network prediction.",{
     V(g)[v]$value <- activate(sum(V(g)[parents]$value * wts)) 
     g
   }
-  #Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  This function exists in *igraphr*, it is *iparents*.
+  #Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  
+  #This function exists in *Lucy*, it is *iparents*.
   #Now we are ready for the propagation of values across the vertices.
   g.final <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
   propagation.prediction <- round(V(g.final)$value, 2)

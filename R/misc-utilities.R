@@ -37,21 +37,6 @@ setIterator <- function(iterator){
   }
 }
 
-
-# #' Extends Magrittr's "$" Pipe Operator igraph.
-# #' 
-# #' For more details Magrittr see \code{?magrittr}
-# #' 
-# #' @examples
-# #' library(igraphr)
-# #' g <- erdos.renyi.game(100, 2/100)
-# #' V(g)$color <- "green"
-# #' g %>% V %$% color
-# #' @export 
-# with.igraph.vs <- function(data, expr, ...) {
-#   eval(substitute(data$c, list(c = substitute(expr))))
-# }
-
 #' Parents/Children of a Vertex
 #' @param g igraph graph object, directed
 #' @param v numeric vertex index or igraph.vs object

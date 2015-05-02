@@ -3,11 +3,7 @@
 \name{iparents}
 \alias{ichildren}
 \alias{iparents}
-\title{#Extends Magrittr's "$" Pipe Operator igraph.
-#
-#For more details Magrittr see \code{?magrittr}
-#
-#}
+\title{Parents/Children of a Vertex}
 \usage{
 iparents(g, v)
 
@@ -19,17 +15,6 @@ ichildren(g, v)
 \item{v}{numeric vertex index or igraph.vs object}
 }
 \description{
-#Extends Magrittr's "$" Pipe Operator igraph.
-#
-#For more details Magrittr see \code{?magrittr}
-#
-#
-}
-\examples{
-#library(igraphr)
-#g <- erdos.renyi.game(100, 2/100)
-#V(g)$color <- "green"
-#g \%>\% V \%$\% color
-#
+Parents/Children of a Vertex
 }
 

@@ -1,14 +1,14 @@
 <!--
-  %\VignetteIndexEntry{Random Graph Generation with igraphr}
+  %\VignetteIndexEntry{Random Graph Generation with lucy}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 -->
 
-# Random Graph Generation with *igraphr*
+# Random Graph Generation with *lucy*
 
 ```{r, message=FALSE}
-#devtools::install_github("osazuwa223/igraphr")
-library(igraphr)
+#devtools::install_github("osazuwa223/lucy")
+library(lucy)
 library(bnlearn)
 ```
 
