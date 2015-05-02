@@ -4,32 +4,31 @@
   \usepackage[utf8]{inputenc}
 -->
 
-# More igraph visualization with igraphr
-
-The goal of **igraphr** is to use igraph as the main tool for managing and manipulating data with a graph/network structure, while at the same time making use of other tools the R ecosystem has for working with graphs.  
-
-Here, I examine various **igraphr** wrappers for visualizing graph objects. 
+# Useful visualizations using igraphr
 
 ```{r, message=FALSE}
 #devtools::install_github("osazuwa223/igraphr")
 library(igraphr)
-library(bnlearn)
+set.seed(20)
 ```
 
 ## Graphviz + igraph
 
-igraph's ba.game function creates a scale-free network.
+The [*Rgraphviz*](http://www.bioconductor.org/packages/release/bioc/html/Rgraphviz.html) package makes very useful layouts for graphs.  A basic Rgraphviz visualization is implemented in the *igraphviz* function.
 
-```{r, message=FALSE, eval=FALSE}
-g <- ba.game(20)
-igraphviz(g)
+```{r}
+igraphviz(ba.game(10))
 ```
-![ba plot](http://i.imgur.com/Q8TeZY0l.png)
 
-igraphr's layerDAGs function stacks layers of highly-connected DAGs on top of one another.
+Rgraphviz is especially useful in the case when there is a hierarchy between graph vertices that can be illustrated with a top-down ordering in the layout.   For example, igraphr's *layerDAGs* function stacks layers of highly-connected directed acyclic graphs on top of one another. 
 
-```{r, eval=FALSE}
+```{r}
 g <- layerDAGs(6, 3)
 igraphviz(g)
 ```
-![layerDags plot](https://i.imgur.com/c5sAQywl.png)
+
+The *plot_path* function takes advantage of this hierarchy visualization technique by coloring all edges lying on paths from an upstream vertex to a downstream vertex.  You can clearly see flow along the paths from top to bottom.
+
+```{r}
+plot_path(g, 6, 13)
+```

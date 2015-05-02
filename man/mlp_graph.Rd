@@ -4,7 +4,7 @@
 \alias{mlp_graph}
 \title{Generate a Multilayer Perceptron Graph}
 \usage{
-mlpgraph(inputs, layers, outputs)
+mlp_graph(inputs, layers, outputs)
 }
 \arguments{
 \item{inputs}{character, the names of the input nodes}

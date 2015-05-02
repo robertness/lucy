@@ -1,7 +1,7 @@
 #' Generate a Multilayer Perceptron Graph 
 #' 
 #' Generate a multi-layer perceptron graph structure.
-#' @usage mlpgraph(inputs, layers, outputs)
+#' @usage mlp_graph(inputs, layers, outputs)
 #' @param inputs character, the names of the input nodes
 #' @param layers a vector of integers specifying the number of hidden neurons (vertices) in each hidden layer
 #' @param outputs character, the names of the output nodes
@@ -57,7 +57,6 @@ mlp_graph <- function(inputs, outputs, layers = NULL){
     graph.data.frame(directed = T, vertices = vertex_table)
   g
 } 
-
 
 #' Generate Multi-connected DAG
 #' 
