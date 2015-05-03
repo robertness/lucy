@@ -10,8 +10,9 @@ Description: Lucy is for people who think about statistics and machine learning 
 License: GPL-2
 Depends: R (>= 2.14),
          igraph (>= 0.7.1),
+         Rgraphviz,
          magrittr
-Imports: Rgraphviz
+Imports: bnlearn
 Suggests: knitr,
-    testthat
+          testthat 
 VignetteBuilder: knitr

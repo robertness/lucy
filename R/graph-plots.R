@@ -13,11 +13,10 @@
 #' igraphviz(g)
 #' @export
 igraphviz <- function(g){
-  if(!requireNamespace("Rgraphviz", quietly = TRUE)) "Load RGraphviz first."
   g <- nameVertices(g)
-  gnell <- g %>% igraph.to.graphNEL %>% layoutGraph
-  layoutGraph(gnell, nodeAttrs=list(label=structure(V(g)$name, names=V(g)$name)))
-  renderGraph(gnell)
+  gnell <- g %>% igraph.to.graphNEL %>% {Rgraphviz::layoutGraph(.)}
+  Rgraphviz::layoutGraph(gnell, nodeAttrs=list(label=structure(V(g)$name, names=V(g)$name)))
+  Rgraphviz::renderGraph(gnell)
 }
 
 #' Plot path from an upstream vertex to a downstream vertex.
@@ -31,7 +30,6 @@ igraphviz <- function(g){
 #' plot_path(g, 4, 11)
 #' @export
 plot_path <- function(g, src, trg){
-  if(!requireNamespace("Rgraphviz", quietly = TRUE)) "Load RGraphviz first."
   if(!(trg %in% getDownstreamNodes(g, src))) stop("Target is not downstream of the source.")
   node_list <- {rep("green", 2)} %>% 
     structure(names = V(g)[c(src, trg)]$name) %>%
@@ -44,8 +42,8 @@ plot_path <- function(g, src, trg){
     {list(col = .)}
   g %>% nameVertices %>% # Give vertices names if they do not have nay 
     igraph.to.graphNEL(.) %>% # convert to a graphNEL
-    layoutGraph(.) %>% 
-    {`nodeRenderInfo<-`(., node_list)} %>%
-    {`edgeRenderInfo<-`(., edge_list)} %>%
-    renderGraph
+    {Rgraphviz::layoutGraph(.)} %>% 
+    {graph::`nodeRenderInfo<-`(., node_list)} %>%
+    {graph::`edgeRenderInfo<-`(., edge_list)} %>%
+    {Rgraphviz::renderGraph(.)}
 }

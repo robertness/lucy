@@ -5,10 +5,10 @@ test_that("layered DAG flows from top to bottom.", {
   expect_true(igraph::is.dag(g.skinny))
   expect_true(igraph::is.dag(g.fat))
   expect_true(
-    isBDownstreamOfA(g.skinny, getRoots(g.skinny)[1], getLeaves(g.skinny)[1])
+    isBDownstreamOfA(g.skinny, get_roots(g.skinny)[1], get_leaves(g.skinny)[1])
   )
   expect_true(
-    isBDownstreamOfA(g.fat, getRoots(g.fat)[1], getLeaves(g.fat)[1])
+    isBDownstreamOfA(g.fat, get_roots(g.fat)[1], get_leaves(g.fat)[1])
   )
 })
 test_that("mlp generation is robust", {
@@ -20,6 +20,7 @@ test_that("mlp generation is robust", {
                "Names of the inputs or outputs conflict with name of hidden nodes.")
 })
 test_that("mlp generation works without hidden layers", {
-  g <- mlp_graph(paste(1:10), "Oout")
+  g <- mlp_graph(paste(1:10), "Out")
   expect_true(ecount(g) == 10)
 })
+

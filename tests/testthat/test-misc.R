@@ -2,8 +2,8 @@ context("Miscellaneous graph utility functions.")
 
 test_that("Roots and leaves correctly defined", {
   g <- igraph::ba.game(20)
-  roots <- getRoots(g)
-  leaves <- getLeaves(g)
+  roots <- get_roots(g)
+  leaves <- get_leaves(g)
   lapply(roots, function(root){ # Define as node in directed network with no parents
     iparents(g, root) %>% 
       length %>%
@@ -74,8 +74,8 @@ test_that("All functions that return edges or vertices return numerics",{
   set.seed(10)
   g <- generateMultiConnectedDAG(50)
   v <- 21; up.str <- 1; down.str <- 40
-  getLeaves(g) %>% is.numeric %>% expect_true
-  getRoots(g) %>% is.numeric %>% expect_true
+  get_leaves(g) %>% is.numeric %>% expect_true
+  get_roots(g) %>% is.numeric %>% expect_true
   getDownstreamNodes(g, v)[5:9] %>%
     identical(c(12, 14, 16, 17, 18)) %>%
     expect_true

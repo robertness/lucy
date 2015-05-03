@@ -80,15 +80,15 @@ outDegree <- function(g, v.set){
 #' @return chacter vector of vertex names
 #' @examples
 #' g <- ba.game(10)
-#' getRoots(g)
-getRoots <- function(g){
+#' get_roots(g)
+get_roots <- function(g){
   checkDirected(g)
   g <- nameVertices(g)
   V(g)[inDegree(g, V(g)) == 0] %>%
     as.numeric
 }
-#' @rdname getRoots
-getLeaves <- function(g){
+#' @rdname get_roots
+get_leaves <- function(g){
   checkDirected(g)
   g <- nameVertices(g)
   V(g)[outDegree(g, V(g)) == 0] %>%

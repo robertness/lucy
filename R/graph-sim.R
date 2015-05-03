@@ -66,11 +66,19 @@ mlp_graph <- function(inputs, outputs, layers = NULL){
 #' @param n Number of nodes
 #' @return An igraph object
 #' @examples 
-#' g <- generateMultiConnectedDag(10)
-#' igraphVizPlot(g)
-generateMultiConnectedDAG <- function(n){  
+#' g <- generateMultiConnectedDAG(10)
+#' igraphviz(g)
+generateMultiConnectedDAG <- function(n){
+  # bnlearn makes a call 'setMethod("nodes", cl, function(object) .nodes(object))'
+  # when loaded.  If the graph package is not attached to the search path, this call fails, seemingly
+  # because a function with the name 'nodes' has to already exist in the path.
+  # So I use require() and detach() to attach and detach the graph package.
+  # I'd prefer not to use these functions since they may have side effects.  
+  # But the only alternative I can think of is to include it in Depends, but this and other graph packages
+  # have conflicts with igraph.
   bn.net <- bnlearn::random.graph(paste(1:n), method = "ic-dag")
   #Limit to one leaf -------------------
+  
   simmed.leaves <- bnlearn::nodes(bn.net)[vapply(bnlearn::nodes(bn.net), 
                                         function(node) length(bnlearn::children(bn.net, node))==0,
                                         TRUE)]
@@ -79,11 +87,12 @@ generateMultiConnectedDAG <- function(n){
     bnlearn::arcs(bn.net) <- rbind(bnlearn::arcs(bn.net), 
                           cbind(setdiff(simmed.leaves, true.leaf), true.leaf))
   }
-  bn.net %>%
+  g <- bn.net %>%
     {bnlearn::as.graphNEL(.)} %>%
     igraph.from.graphNEL() %>%
     nameEdges() %>%
     nameVertices
+  g
 }
 
 #' Generate graph comprised of sequentially layered randomly generated DAGs.
@@ -99,16 +108,23 @@ generateMultiConnectedDAG <- function(n){
 #' @return A DAG as an igraph object.
 #' @examples
 #' g <- layerDAGs(3, 4)
-#' igraphVizPlot(g)
+#' igraphviz(g)
 layerDAGs <- function(k, n){
+  # bnlearn makes a call 'setMethod("nodes", cl, function(object) .nodes(object))'
+  # when loaded.  If the graph package is not attached to the search path, this call fails, seemingly
+  # because a function with the name 'nodes', from the 'graph' package, has to already exist in the path.
+  # So I use require() and detach() to attach and detach the graph package.
+  # I'd prefer not to use these functions since they may have side effects.  
+  # But the only alternative I can think of is to include it in Depends, but this and other graph packages
+  # have conflicts with igraph.
   subset.index <- rep(1:k, each = n)
   node.names <- paste(1:(k*n))
   node.name.list <- split(node.names, f=subset.index)
   nets <- lapply(node.name.list, function(node.names){
-    if("package:bnlearn" %in% search()) stop("Run 'detach(package:bnlearn)' first.")
     g <- bnlearn::random.graph(node.names, method = "ic-dag") %>% #Convert bn to igraph by ...
-      {bnlearn::as.graphNEL(.)} %>% # ... first converting to graphNEL
-      igraph.from.graphNEL # ... then converting to an igraph
+      {bnlearn::as.graphNEL(.)} %>%# ... first converting to graphNEL
+      igraph.from.graphNEL
+    # ... then converting to an igraph
     V(g)$name <- node.names
     g
   })
@@ -118,10 +134,10 @@ layerDAGs <- function(k, n){
   }
   for(i in 2:k){
     net.last <- nets[[i-1]]; net <- nets[[i]] #I will connect net.last to net 
-    last.leaves <- getLeaves(net.last) 
+    last.leaves <- get_leaves(net.last) 
     parents.of.leaves <- lapply(last.leaves, iparents, g = net.last) %>% unlist
     last.from <- c(last.leaves, parents.of.leaves)
-    current.roots <- getRoots(net)
+    current.roots <- get_roots(net)
     children.of.roots <- lapply(current.roots, ichildren, g = net.last) %>% unlist
     current.to <- c(current.roots, children.of.roots)
     el <- expand.grid(V(net.last)[last.from]$name, V(net)[current.to]$name)

@@ -83,7 +83,7 @@ test_that("product of parents on a DAG works", {
     g
   }
   g.final <- updateVertices(g, iparents, getSum)
-  leaf <- getLeaves(g)[1]
+  leaf <- get_leaves(g)[1]
   upstream.nodes <- getUpstreamNodes(g, leaf)
   expect_equal(V(g.final)[leaf]$value, sum(V(g)$value))
 })

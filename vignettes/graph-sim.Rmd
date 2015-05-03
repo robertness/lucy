@@ -9,22 +9,21 @@
 ```{r, message=FALSE}
 #devtools::install_github("osazuwa223/lucy")
 library(lucy)
-library(bnlearn)
 ```
 
 The generation of graphs in igraph does not provide many options.  The following functions generate highly connected DAGs.
 
 ```{r, message=FALSE}
 g <- generateMultiConnectedDAG(10)
-igraphVizPlot(g)
+igraphviz(g)
 ```
 
 ```{r}
 g <- layerDAGs(3, 4)
-igraphVizPlot(g)
+igraphviz(g)
 ```
 
 ```{r}
 g <- layerDAGs(6, 3)
-igraphVizPlot(g)
+igraphviz(g)
 ```

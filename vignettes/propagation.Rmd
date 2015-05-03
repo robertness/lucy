@@ -20,9 +20,9 @@ Examples of this type of systematic update includes:
 * Boolean networks
 * Cellular automata
 
-When variables are vertices/nodes (I use the terms interchangebly) or edges in a graph, then a change to the state of one object "propagates" through the rest of the graph.
+When variables are vertices/nodes (I use the terms interchangebly) or edges in a graph, then a change to the state of one vertex/edge "propagates" through the rest of the graph.
 
-lucy builds the basis for such propogations using igraph.
+*Lucy* builds the basis for such propogations using igraph.
 
 Propagation is done with one of either two functions, *updateVertices* or *updateEdges*, which predictably do propagation on edges or on vertices.  Each take an igraph object as an argument, as well as two other key arguments; functions "getDeterminers" and "callback".  
 
@@ -73,8 +73,8 @@ The results:
   V(g)$name <- round(V(g)$value, 2)
   V(g.final)$name <-round(V(g.final)$value,2)
   par(mfrow = c(1,2))
-  igraphVizPlot(g, list(main="Initial Graph"))
-  igraphVizPlot(g.final, list(main="After Propagation"))
+  igraphviz(g, list(main="Initial Graph"))
+  igraphviz(g.final, list(main="After Propagation"))
 ```
 
 ## Prediction from a Multi-layer perceptron
@@ -121,7 +121,7 @@ g <- wts %>%
   rbind.fill %>%
   `names<-`(c("from", "to", "weight")) %>%
   graph.data.frame %T>%
-  igraphVizPlot
+  igraphviz
 ```
 
 The weights are stored as the "weight" edge attribute.
@@ -163,7 +163,7 @@ calculateNode <- function(g, v){
 }
 ```
 
-Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  This function exists in *lucy*, it is *iparents*.
+Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  This function exists in *Lucy*, it is *iparents*.
 
 Now we are ready for the propagation of values across the vertices.
 

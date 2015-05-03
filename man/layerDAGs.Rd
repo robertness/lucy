@@ -24,6 +24,6 @@ as implemented in the bnlearn pacakge.  The resulting network is still a DAG.
 }
 \examples{
 g <- layerDAGs(3, 4)
-igraphVizPlot(g)
+igraphviz(g)
 }
 

@@ -18,7 +18,7 @@ This uses Ide's and Cozman's DAG algorithm in the bnlearn package, which generat
 more connectivity.  This function currently only outputs one leaf node.
 }
 \examples{
-g <- generateMultiConnectedDag(10)
-igraphVizPlot(g)
+g <- generateMultiConnectedDAG(10)
+igraphviz(g)
 }
 
