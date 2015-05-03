@@ -4,10 +4,12 @@
 \alias{igraphviz}
 \title{igraph plotting with Graphviz library}
 \usage{
-igraphviz(g)
+igraphviz(g, main = NULL)
 }
 \arguments{
 \item{g}{an igraph object.}
+
+\item{main}{character, the desired title of the graph. Default is NULL}
 }
 \value{
 graphviz.plot returns invisibly the graph object produced by Rgraphviz.

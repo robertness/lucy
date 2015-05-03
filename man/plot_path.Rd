@@ -4,7 +4,7 @@
 \alias{plot_path}
 \title{Plot path from an upstream vertex to a downstream vertex.}
 \usage{
-plot_path(g, src, trg)
+plot_path(g, src, trg, main = NULL)
 }
 \arguments{
 \item{g}{igraph object}
@@ -12,6 +12,8 @@ plot_path(g, src, trg)
 \item{src}{an upstream vertex in g}
 
 \item{trg}{a downstream vertex in g}
+
+\item{main}{character, the desired title of the graph. Default is NULL}
 }
 \description{
 Plot path from an upstream vertex to a downstream vertex.

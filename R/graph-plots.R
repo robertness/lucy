@@ -5,6 +5,7 @@
 #' directly. 
 
 #' @param g an igraph object.
+#' @param main character, the desired title of the graph. Default is NULL
 #' @return graphviz.plot returns invisibly the graph object produced by Rgraphviz.
 #' @examples
 #' g <- ba.game(20)
@@ -12,11 +13,13 @@
 #' g <- layerDAGs(3, 4)
 #' igraphviz(g)
 #' @export
-igraphviz <- function(g){
+igraphviz <- function(g, main = NULL){
   g <- nameVertices(g)
   gnell <- g %>% igraph.to.graphNEL %>% {Rgraphviz::layoutGraph(.)}
   Rgraphviz::layoutGraph(gnell, nodeAttrs=list(label=structure(V(g)$name, names=V(g)$name)))
-  Rgraphviz::renderGraph(gnell)
+  if(!is.null(main)) graph::graph.par(list(graph = list(main = main))) # Add a title if one is given
+  Rgraphviz::renderGraph(gnell) # Render the graph
+  graph::graph.par(list(graph = list(main = ""))) # Reset graph parameters
 }
 
 #' Plot path from an upstream vertex to a downstream vertex.
@@ -24,12 +27,13 @@ igraphviz <- function(g){
 #' @param g igraph object
 #' @param src an upstream vertex in g
 #' @param trg a downstream vertex in g
+#' @param main character, the desired title of the graph. Default is NULL
 #' @examples
 #' set.seed(20)
 #' g <- layerDAGs(6, 3)
 #' plot_path(g, 4, 11)
 #' @export
-plot_path <- function(g, src, trg){
+plot_path <- function(g, src, trg, main = NULL){
   if(!(trg %in% getDownstreamNodes(g, src))) stop("Target is not downstream of the source.")
   node_list <- {rep("green", 2)} %>% 
     structure(names = V(g)[c(src, trg)]$name) %>%
@@ -40,10 +44,12 @@ plot_path <- function(g, src, trg){
     apply(1, paste0, collapse="~") %>%
     {structure(rep("green", length(.)), names = .)} %>%
     {list(col = .)}
-  g %>% nameVertices %>% # Give vertices names if they do not have nay 
+  g_out <- g %>% nameVertices %>% # Give vertices names if they do not have nay 
     igraph.to.graphNEL(.) %>% # convert to a graphNEL
-    {Rgraphviz::layoutGraph(.)} %>% 
-    {graph::`nodeRenderInfo<-`(., node_list)} %>%
-    {graph::`edgeRenderInfo<-`(., edge_list)} %>%
-    {Rgraphviz::renderGraph(.)}
+    {Rgraphviz::layoutGraph(.)} %>% # lay the graph out
+    {graph::`nodeRenderInfo<-`(., node_list)} %>% # add the node annotation
+    {graph::`edgeRenderInfo<-`(., edge_list)} # add the edge annotation
+    if(!is.null(main)) graph::graph.par(list(graph = list(main = main))) # Add a title if one is given
+    Rgraphviz::renderGraph(g_out) # Render the graph
+    graph::graph.par(list(graph = list(main = ""))) # Reset graph parameters
 }

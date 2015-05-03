@@ -1,17 +1,17 @@
 <!--
-  %\VignetteIndexEntry{Random Graph Generation with lucy}
+  %\VignetteIndexEntry{Random Graph Generation with Lucy}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 -->
 
-# Random Graph Generation with *lucy*
+# Random Graph Generation with *Lucy*
 
 ```{r, message=FALSE}
 #devtools::install_github("osazuwa223/lucy")
 library(lucy)
 ```
 
-The generation of graphs in igraph does not provide many options.  The following functions generate highly connected DAGs.
+Some functions that generate highly connected DAGs that are common in neural networks, neural networks, signaling networks, and Bayesian networks.
 
 ```{r, message=FALSE}
 g <- generateMultiConnectedDAG(10)

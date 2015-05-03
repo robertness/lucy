@@ -73,8 +73,8 @@ The results:
   V(g)$name <- round(V(g)$value, 2)
   V(g.final)$name <-round(V(g.final)$value,2)
   par(mfrow = c(1,2))
-  igraphviz(g, list(main="Initial Graph"))
-  igraphviz(g.final, list(main="After Propagation"))
+  igraphviz(g)
+  igraphviz(g.final, main="After Propagation")
 ```
 
 ## Prediction from a Multi-layer perceptron
