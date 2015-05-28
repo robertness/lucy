@@ -4,7 +4,7 @@
   \usepackage[utf8]{inputenc}
 -->
 
-# Random Graph Generation with *Lucy*
+# Random Graph Generation with Lucy
 
 ```{r, message=FALSE}
 #devtools::install_github("osazuwa223/lucy")

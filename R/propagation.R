@@ -1,3 +1,4 @@
+#' Enforce integer indexing
 checkIndex <- function(object){
   if(!(class(object) %in% c("integer","numeric", "igraph.vs", "igraph.es"))){
     stop("Refer to edges/vertices with an integer, numeric, or igraph iterators")
