@@ -37,7 +37,7 @@ setIterator <- function(iterator){
   }
 }
 
-#' Parents/Children of a Vertex
+#' Parents/Children/Markov Blanket of a Vertex
 #' @param g igraph graph object, directed
 #' @param v numeric vertex index or igraph.vs object
 #' @export
@@ -52,6 +52,16 @@ ichildren <- function(g, v){
   if(!is.directed(g)) stop("g must be a directed graph")
   V(g)[nei(v, mode="out")] %>% as.numeric
 }
+#' @rdname iparents
+imb <- function(g, v){
+  v <- checkVertex(v)
+  if(!is.directed(g)) stop("g must be a directed graph")
+  parents <- iparents(g, v)
+  children <- ichildren(g, v)
+  parents_of_children <- lapply(children, function(child) iparents(g, child)) %>% unlist %>% setdiff(v)
+  unique(c(parents, children, parents_of_children))
+}
+
 
 #' In/Out-degree of a set of vertices in a directed graph
 #' 

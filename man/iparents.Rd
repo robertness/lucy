@@ -2,12 +2,15 @@
 % Please edit documentation in R/misc-utilities.R
 \name{iparents}
 \alias{ichildren}
+\alias{imb}
 \alias{iparents}
-\title{Parents/Children of a Vertex}
+\title{Parents/Children/Markov Blanket of a Vertex}
 \usage{
 iparents(g, v)
 
 ichildren(g, v)
+
+imb(g, v)
 }
 \arguments{
 \item{g}{igraph graph object, directed}
@@ -15,6 +18,6 @@ ichildren(g, v)
 \item{v}{numeric vertex index or igraph.vs object}
 }
 \description{
-Parents/Children of a Vertex
+Parents/Children/Markov Blanket of a Vertex
 }
 
