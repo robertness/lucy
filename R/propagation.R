@@ -87,9 +87,11 @@ getTraverser <- function(iterator){
 #' \code{updateVertices} performs propagation on vertices. \code{updateEdges} performs propagation on edges.  
 #'   
 #' @param g A graph object.
-#' @param getDeterminers The function that gives the vertices/edges that must be updated for the callback to be 
-#' executed 
-#' @param callback The function performed on each vertex/edge
+#' @param getDeterminers A function returns the vertice/edge indices that must be updated for the callback to be 
+#' executed.  Arguments: g - the graph object, i - the index of a vertex/edge in g. Returns: an array of indices
+#' for the vertices/edges that are needed to perform the callback on vertex/edge i.
+#' @param callback The function performed on each vertex/edge. Arguments: g - the graph object, i - the index of a graph/edge in g.
+#' Returns: a graph object.
 #' @return A igraph object with updated vertex/edge states. A warning message is returned if not all vertices 
 #' could be updated.
 #' @export
