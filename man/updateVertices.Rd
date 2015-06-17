@@ -12,10 +12,12 @@ updateEdges(g, getDeterminers, callback)
 \arguments{
 \item{g}{A graph object.}
 
-\item{getDeterminers}{The function that gives the vertices/edges that must be updated for the callback to be
-executed}
+\item{getDeterminers}{A function returns the vertice/edge indices that must be updated for the callback to be
+executed.  Arguments: g - the graph object, i - the index of a vertex/edge in g. Returns: an array of indices
+for the vertices/edges that are needed to perform the callback on vertex/edge i.}
 
-\item{callback}{The function performed on each vertex/edge}
+\item{callback}{The function performed on each vertex/edge. Arguments: g - the graph object, i - the index of a graph/edge in g.
+Returns: a graph object.}
 }
 \value{
 A igraph object with updated vertex/edge states. A warning message is returned if not all vertices
