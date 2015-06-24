@@ -1,0 +1,120 @@
+---
+title: "Processing GDSC Data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+## Mapping gene expression data to a graph
+
+In the following gene expression dataset, each row is a sample, each column corresponds to a gene, and each element is a quantification of gene expression.
+
+```{r, message = FALSE}
+library(lucy)
+```
+```{r, echo=FALSE, message = FALSE}
+#load("inst/extdata/observationData.rda")
+load("../inst/extdata/observationData.rda")
+```
+```{r}
+# Dimension of the data
+dim(obs_data)
+# First 5 samples and 5 genes
+obs_data[1:5, 1:5]
+```
+
+I added the data to a gene regulatory network.  Each vertex in the graph corresponds to a gene.  Each directed edge corresponds to one gene's regulation of another.
+
+```{r, echo = FALSE, message=FALSE}
+#load("inst/extdata/g_enriched.rda")
+load("../inst/extdata/g_enriched.rda")
+V(g)$updated <- FALSE
+E(g)$weight <- rep(0, ecount(g))
+```
+
+```{r, echo = FALSE, eval = FALSE}
+library(signalgraph)
+sg_viz(g, show_biases = FALSE)
+```
+
+![Imgur](http://i.imgur.com/5E5LWmrl.png)
+
+I mapped each column of gene quantification values in the data to the gene's vertex in the network.  For example, here are the first 5 observations for TP53.
+
+```{r}
+head(unlist(V(g)["TP53"]$observed))
+```
+
+## Lasso regression across the graph structure
+
+My goal here is to regress each child against its parents.  Further, I assume that not all of the regulatory relationships in the graph are active in the data, so some of the regression parameters should be 0.  To solve this, I apply a L1 (LASSO) constraint such that some of the regression parameters are "shrunk" to 0 during model fitting.
+
+LASSO regression is implemented in the package [glmnet]("http://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html").  
+
+```{r, message=FALSE}
+library(glmnet)
+```
+
+For each node, I'll fit a linear regression model with L1 penalty the node's data as the response, and the parents' data as the predictors.  
+
+Selection of the penalty parameter "lambda" requires consideration.  There are far more data for each vertex than there are parents.  Here I arbitrarily select a lambda of 10.  In practice, one would select lambda based on optimization some property of the graph and data.
+
+I log the expression values so the linear regression model is more appropriate, and then standardize the logged expression values so the regression parameter estimates are comparable across nodes. For simplicity I implement this step as a function.
+
+```{r}
+# log and standardize a matrix of gene expression values
+log_standardize <- function(mat) apply(log(mat), 2, function(x) x / sd(x)) 
+````
+
+I use the parameter estimates to a *weight* attribute on the edges.  The parameter estimate for the coefficient of parent A on child B, becomes the weight of edge A -> B.  
+
+The estimation of the linear model coefficients, I pull into a separate function.  Glmnet does not allow for univariate regression, so in this case I use ordinary linear regression.
+
+```{r}
+get_coefficients <- function(X, Y, lambda){
+  if(ncol(X) == 1) return(lm.fit(cbind(1, X), Y)$coefficients[-1])
+  glmnet(X, Y, family = "gaussian", lambda = lambda) %>% 
+    coef %>%
+    as.numeric %>%
+    .[-1]
+}
+```
+
+I'll use *Lucy*'s *updateVertices* function, which will apply the following callback function to each vertex.  
+
+```{r}
+get_fit <- function(g, v){
+  parents <- iparents(g, v) # Fetch the parents of vertex v
+  if(length(parents) == 0) return(g) # If v has no parents, return the unmodified graph
+  X <- log_standardize(do.call("cbind", V(g)[parents]$observed))
+  Y = unlist(V(g)[v]$observed)
+  E(g)[to(v)]$weight <- get_coefficients(X, Y, g$lambda)
+  g
+}
+```
+
+Finally, I apply "updateVertices":
+
+```{r, eval = FALSE}
+g$lambda <- 10
+g_fit <- updateVertices(g, iparents, do_glmnet)
+```
+
+```{r, echo=FALSE}
+#save(g_fit, file="inst/extdata/g_fit.rda")
+load(file="../inst/extdata/g_fit.rda")
+```
+
+I can view the edge weights in a data frame.  The first 10 edges are shown below:
+
+```{r, message = FALSE}
+library(dplyr)
+g_fit %>%
+  get.edgelist %>% 
+  as.data.frame %>%
+  mutate(weight = E(g_fit)$weight) %>%
+  head(20)
+```
+

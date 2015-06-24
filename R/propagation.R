@@ -29,7 +29,6 @@ getUpdater <- function(iterator){
     iterator <- ifelse(length(formals(S)) == 4, "edge", "vertex") # for debugging purposes, can delete
     #message("#", rec.level, " level recursion for ", iterator, " updater")
     rec.level <<- rec.level + 1
-    if(length(S(g)[object]$updated) == 0) browser()
     if(!(S(g)[object]$updated)){ #'S' is either E or V, set by setIterator()
       determiners <- getDeterminers(g, object)
       if(length(determiners) > 0){
