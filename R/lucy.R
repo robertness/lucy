@@ -85,7 +85,7 @@ isBDownstreamOfA <- function(g, a, b){
 isBUpstreamOfA <- function(g, a, b){
   sp <- suppressWarnings(shortest.paths(g, v = a, to = b, 
                                         mode = "in",
-                                        algorithm = "unweighted"))[paste(a), paste(b)]
+                                        algorithm = "unweighted"))[V(g)[a]$name, V(g)[b]$name]
   is.finite(sp)
 }
 
