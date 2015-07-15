@@ -61,22 +61,18 @@ mlp_graph <- function(inputs, outputs, layers = NULL){
 #' Generate Multi-connected DAG
 #' 
 #' An alternative to the scale-free DAG generating Barabasi algorithm in igraph..
-#' This uses Ide's and Cozman's DAG algorithm in the bnlearn package, which generates DAGS with 
-#' more connectivity.  This function currently only outputs one leaf node.
+#'This function currently only outputs one leaf node.
 #' @param n Number of nodes
+#' @param method the algorithm used in simulation. The default is Ide's and Cozman's DAG algorithm 
+#' in the bnlearn package, which generates DAGs with more connectivity. 
+#' See the random.graph function in bnlearn for details.
 #' @return An igraph object
+#' @export
 #' @examples 
-#' g <- generateMultiConnectedDAG(10)
+#' g <- sim_DAG(10)
 #' igraphviz(g)
-generateMultiConnectedDAG <- function(n){
-  # bnlearn makes a call 'setMethod("nodes", cl, function(object) .nodes(object))'
-  # when loaded.  If the graph package is not attached to the search path, this call fails, seemingly
-  # because a function with the name 'nodes' has to already exist in the path.
-  # So I use require() and detach() to attach and detach the graph package.
-  # I'd prefer not to use these functions since they may have side effects.  
-  # But the only alternative I can think of is to include it in Depends, but this and other graph packages
-  # have conflicts with igraph.
-  bn.net <- bnlearn::random.graph(paste(1:n), method = "ic-dag")
+sim_DAG <- function(n, method = "ic-dag"){
+  bn.net <- bnlearn::random.graph(paste(1:n), method = method)
   #Limit to one leaf -------------------
   
   simmed.leaves <- bnlearn::nodes(bn.net)[vapply(bnlearn::nodes(bn.net), 
@@ -105,23 +101,20 @@ generateMultiConnectedDAG <- function(n){
 #' as implemented in the bnlearn pacakge.  The resulting network is still a DAG.
 #' @param k Number of layers.
 #' @param n Number of nodes in each layer
+#' @param method the algorithm used in simulation. The default is Ide's and Cozman's DAG algorithm 
+#' in the bnlearn package, which generates DAGs with more connectivity. 
+#' See the random.graph function in bnlearn for details.
 #' @return A DAG as an igraph object.
+#' @export
 #' @examples
-#' g <- layerDAGs(3, 4)
+#' g <- layer_DAGs(3, 4)
 #' igraphviz(g)
-layerDAGs <- function(k, n){
-  # bnlearn makes a call 'setMethod("nodes", cl, function(object) .nodes(object))'
-  # when loaded.  If the graph package is not attached to the search path, this call fails, seemingly
-  # because a function with the name 'nodes', from the 'graph' package, has to already exist in the path.
-  # So I use require() and detach() to attach and detach the graph package.
-  # I'd prefer not to use these functions since they may have side effects.  
-  # But the only alternative I can think of is to include it in Depends, but this and other graph packages
-  # have conflicts with igraph.
+layer_DAGs <- function(k, n, method = "ic-dag"){
   subset.index <- rep(1:k, each = n)
   node.names <- paste(1:(k*n))
   node.name.list <- split(node.names, f=subset.index)
   nets <- lapply(node.name.list, function(node.names){
-    g <- bnlearn::random.graph(node.names, method = "ic-dag") %>% #Convert bn to igraph by ...
+    g <- bnlearn::random.graph(node.names, method = method) %>% #Convert bn to igraph by ...
       {bnlearn::as.graphNEL(.)} %>%# ... first converting to graphNEL
       igraph.from.graphNEL
     # ... then converting to an igraph

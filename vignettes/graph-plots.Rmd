@@ -23,7 +23,7 @@ igraphviz(ba.game(10))
 Rgraphviz is especially useful in the case when there is a hierarchy between graph vertices that can be illustrated with a top-down ordering in the layout.   For example, lucy's *layerDAGs* function stacks layers of highly-connected directed acyclic graphs on top of one another. 
 
 ```{r}
-g <- layerDAGs(6, 3)
+g <- layer_DAGs(6, 3)
 igraphviz(g)
 ```
 

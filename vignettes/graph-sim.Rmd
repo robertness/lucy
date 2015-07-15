@@ -14,16 +14,16 @@ library(lucy)
 Some functions that generate highly connected DAGs that are common in neural networks, neural networks, signaling networks, and Bayesian networks.
 
 ```{r, message=FALSE}
-g <- generateMultiConnectedDAG(10)
+g <- sim_DAG(10)
 igraphviz(g)
 ```
 
 ```{r}
-g <- layerDAGs(3, 4)
+g <- layer_DAGs(3, 4)
 igraphviz(g)
 ```
 
 ```{r}
-g <- layerDAGs(6, 3)
+g <- layer_DAGs(6, 3)
 igraphviz(g)
 ```

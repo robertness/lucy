@@ -22,7 +22,7 @@ directly.
 \examples{
 g <- ba.game(20)
 igraphviz(g)
-g <- layerDAGs(3, 4)
+g <- layer_DAGs(3, 4)
 igraphviz(g)
 }
 

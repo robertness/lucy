@@ -1,6 +1,6 @@
 context("test plots")
-g1 <- layerDAGs(5, 3)
-g2 <- generateMultiConnectedDAG(10)
+g1 <- layer_DAGs(5, 3)
+g2 <- sim_DAG(10)
 test_that("igraphviz works", {
   igraphviz(g1, main = "G1")
   igraphviz(g2, main = "G2")

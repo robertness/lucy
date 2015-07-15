@@ -1,7 +1,7 @@
 context("Graph Simulations")
 test_that("layered DAG flows from top to bottom.", {
-  g.skinny <- layerDAGs(10, 3)
-  g.fat <- layerDAGs(3, 5)
+  g.skinny <- layer_DAGs(10, 3)
+  g.fat <- layer_DAGs(3, 5)
   expect_true(igraph::is.dag(g.skinny))
   expect_true(igraph::is.dag(g.fat))
   expect_true(

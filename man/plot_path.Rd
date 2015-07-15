@@ -20,7 +20,7 @@ Plot path from an upstream vertex to a downstream vertex.
 }
 \examples{
 set.seed(20)
-g <- layerDAGs(6, 3)
+g <- layer_DAGs(6, 3)
 plot_path(g, 4, 11)
 }
 

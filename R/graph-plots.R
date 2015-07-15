@@ -10,7 +10,7 @@
 #' @examples
 #' g <- ba.game(20)
 #' igraphviz(g)
-#' g <- layerDAGs(3, 4)
+#' g <- layer_DAGs(3, 4)
 #' igraphviz(g)
 #' @export
 igraphviz <- function(g, main = NULL){
@@ -30,7 +30,7 @@ igraphviz <- function(g, main = NULL){
 #' @param main character, the desired title of the graph. Default is NULL
 #' @examples
 #' set.seed(20)
-#' g <- layerDAGs(6, 3)
+#' g <- layer_DAGs(6, 3)
 #' plot_path(g, 4, 11)
 #' @export
 plot_path <- function(g, src, trg, main = NULL){

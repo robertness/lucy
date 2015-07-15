@@ -112,6 +112,7 @@ get_leaves <- function(g){
 #' vertex id, the edges it is 'from->to'. 
 #' 
 #' @param g an igraph directed graph
+#' @export
 #' @return the graph with the vertex attribute 'name'
 nameVertices <- function(g){
   if(is.null(V(g)$name)){

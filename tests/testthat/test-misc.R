@@ -23,7 +23,7 @@ test_that("All functions edges/vertices on iterators take an numeric
             # with names instead of indices and later scrapped this idea, the tests
             # are neccessary to suss out errors in other code.
             set.seed(10)
-            g <- generateMultiConnectedDAG(50)
+            g <- sim_DAG(50)
             checkVertexInputs <- function(v, up.str, down.str){
               getDownstreamNodes(g, v)[5:9] %>%
                 identical(c(12, 14, 16, 17, 18)) %>%
@@ -72,7 +72,7 @@ test_that("All functions edges/vertices on iterators take an numeric
 
 test_that("All functions that return edges or vertices return numerics",{
   set.seed(10)
-  g <- generateMultiConnectedDAG(50)
+  g <- sim_DAG(50)
   v <- 21; up.str <- 1; down.str <- 40
   get_leaves(g) %>% is.numeric %>% expect_true
   get_roots(g) %>% is.numeric %>% expect_true
@@ -113,7 +113,7 @@ test_that("All functions that return edges or vertices return numerics",{
 test_that("Functions that take single vertices/edges as arguments error out when
           more than one vertex or argument is passed.", {
             set.seed(10)
-            g <- generateMultiConnectedDAG(50)
+            g <- sim_DAG(50)
             v <- 21; down.str <- 40
             w <- c(20, 21, 22)
             vlist <- list(
@@ -128,6 +128,6 @@ test_that("Functions that take single vertices/edges as arguments error out when
           })
 
 test_that("edge name should not return any NAs", {
-  g <- generateMultiConnectedDAG(50) %>% nameEdges
+  g <- sim_DAG(50) %>% nameEdges
   E(g)$name %>% is.na %>% any %>% expect_false
 })
