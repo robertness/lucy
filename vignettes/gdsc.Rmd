@@ -82,7 +82,7 @@ get_coefficients <- function(X, Y, lambda){
 }
 ```
 
-I'll use *Lucy*'s *updateVertices* function, which will apply the following callback function to each vertex.  
+I'll use *Lucy*'s *update_vertices* function, which will apply the following callback function to each vertex.  
 
 ```{r}
 get_fit <- function(g, v){
@@ -95,11 +95,11 @@ get_fit <- function(g, v){
 }
 ```
 
-Finally, I apply "updateVertices":
+Finally, I apply "update_vertices":
 
 ```{r, eval = FALSE}
 g$lambda <- 10
-g_fit <- updateVertices(g, iparents, do_glmnet)
+g_fit <- update_vertices(g, iparents, do_glmnet)
 ```
 
 ```{r, echo=FALSE}

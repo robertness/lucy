@@ -86,8 +86,8 @@ sim_DAG <- function(n, method = "ic-dag"){
   g <- bn.net %>%
     {bnlearn::as.graphNEL(.)} %>%
     igraph.from.graphNEL() %>%
-    nameEdges() %>%
-    nameVertices
+    name_edges() %>%
+    name_vertices
   g
 }
 

@@ -26,7 +26,7 @@ When variables are vertices/nodes (I use the terms interchangebly) or edges in a
 
 *Lucy* builds the basis for such propogations using igraph.
 
-Propagation is done with one of either two functions, *updateVertices* or *updateEdges*, which predictably do propagation on edges or on vertices.  Each take an igraph object as an argument, as well as two other key arguments; functions "getDeterminers" and "callback".  
+Propagation is done with one of either two functions, *update_vertices* or *update_edges*, which predictably do propagation on edges or on vertices.  Each take an igraph object as an argument, as well as two other key arguments; functions "getDeterminers" and "callback".  
 
 *getDeterminers* must be a function that takes the arguments *g* for a graph object, and *obj*, which is a character naming either a vertex or an edge in the graph g.
 
@@ -46,7 +46,7 @@ I start by demonstrating a simple propagation on a tree.  Each node has an initi
 First, I create the graph, create initial values for each node, and then set the *updated* attribute to FALSE.  
 
 ```{r}
-g <- ba.game(10) %>% nameVertices
+g <- ba.game(10) %>% name_vertices
   V(g)$value <- log(sample(1:50, 10))
   V(g)$updated <- FALSE
 ```
@@ -63,10 +63,10 @@ getSum <- function(g, v) {
 }
 ```
 
-The calculation for each node depends on the parents, so the *getDeterminers* argument for the *updateVertices* function will be *iparents*.
+The calculation for each node depends on the parents, so the *getDeterminers* argument for the *update_vertices* function will be *iparents*.
 
 ```{r}
-g.final <- updateVertices(g, iparents, getSum)
+g.final <- update_vertices(g, iparents, getSum)
 ```
 
 The results:
@@ -170,7 +170,7 @@ Since the state of each node is determined by the state of its parent nodes, the
 Now we are ready for the propagation of values across the vertices.
 
 ```{r}
-g.final <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
+g.final <- update_vertices(g, getDeterminers = iparents, callback = calculateNode)
 propagation.prediction <- V(g.final)$value
 names(propagation.prediction) <- V(g.final)$name
 ```

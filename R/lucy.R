@@ -31,10 +31,10 @@ examineGraph <- function(g, formatGraphAttr = NULL, formatVertexAttr= NULL, form
 #' @param w character, the name of a vertex in g
 #' @return character vector of vertex names.
 #' @export
-getDownstreamNodes <- function(g, w){
+get_downstream_nodes <- function(g, w){
   w <- checkVertex(w)
   if(!is.directed(g)) stop("Graph must be directed.")
-  g <- nameVertices(g)
+  g <- name_vertices(g)
   sp.mat <- shortest.paths(g, v = V(g), to = w, mode = "in") 
   if(is.null(dimnames(sp.mat))){
     dimnames(sp.mat) <- list(paste(1:vcount(g)), paste(w))
@@ -46,11 +46,12 @@ getDownstreamNodes <- function(g, w){
     as.numeric %>% # convert to numeric
     setdiff(w) # exclude the source node itself
 }
-#' @rdname getDownstreamNodes
-getUpstreamNodes <- function(g, w){
+#' @rdname get_downstream_nodes
+#' @export
+get_upstream_nodes <- function(g, w){
   w <- checkVertex(w)
   if(!is.directed(g)) stop("Graph must be directed.")
-  g <- nameVertices(g)
+  g <- name_vertices(g)
   sp.mat <- shortest.paths(g, v = V(g), to = w, mode = "out") 
   if(is.null(dimnames(sp.mat))){
     dimnames(sp.mat) <- list(paste(1:vcount(g)), paste(w))
@@ -75,13 +76,14 @@ getUpstreamNodes <- function(g, w){
 isBDownstreamOfA <- function(g, a, b){
   a <- checkVertex(a)
   b <- checkVertex(b)
-  g <- nameVertices(g)
+  g <- name_vertices(g)
   sp <- suppressWarnings(shortest.paths(g, v = a, to = b, 
                        mode = "out",
                        algorithm = "unweighted"))[V(g)[a]$name, V(g)[b]$name]
   is.finite(sp)
 }
-#' @rdname getConnectingNodes
+#' @rdname get_connecting_nodes
+#' @export
 isBUpstreamOfA <- function(g, a, b){
   sp <- suppressWarnings(shortest.paths(g, v = a, to = b, 
                                         mode = "in",
@@ -99,10 +101,10 @@ isBUpstreamOfA <- function(g, a, b){
 #' @param trg vertex index of class numeric or igraph.vs, ending vertex
 #' @return numeric vertex indices, including the src and trg indices
 #' @export
-getConnectingNodes <- function(g, src, trg){
+get_connecting_nodes <- function(g, src, trg){
   v1 <- checkVertex(src)
   v2 <- checkVertex(trg)
-  v1.downstream.nodes.except.v2 <- setdiff(getDownstreamNodes(g, v1), v2)
+  v1.downstream.nodes.except.v2 <- setdiff(get_downstream_nodes(g, v1), v2)
   downstream.nodes.upstream.to.v2 <- NULL
   if(length(v1.downstream.nodes.except.v2) > 0){
     bool <- sapply(v1.downstream.nodes.except.v2, function(node){
@@ -112,22 +114,22 @@ getConnectingNodes <- function(g, src, trg){
   }
   c(v1, downstream.nodes.upstream.to.v2, v2)
 }
-#' @rdname getConnectingNodes
-getConnectingEdges <- function(g, src, trg){
+#' @rdname get_connecting_nodes
+get_connecting_edges <- function(g, src, trg){
   src <- checkVertex(src)
   trg <- checkVertex(trg)
   output.edges <- NULL
   if(V(g)[trg] != V(g)[src]){
-    if(!(trg %in% getDownstreamNodes(g, src))) {
+    if(!(trg %in% get_downstream_nodes(g, src))) {
       stop("Target is not downstream of the source.")
     }
-    v.set <- getConnectingNodes(g, src, trg)
+    v.set <- get_connecting_nodes(g, src, trg)
     output.edges <- E(g)[v.set %->% v.set] 
   }
   as.numeric(output.edges)
 }
 
-randomWalk <- function(g, starts, r = 0, use.weights = F){
+random_walk <- function(g, starts, r = 0, use.weights = F){
   if(!use.weights) E(g)$weight <- 1
   starts.name <- V(g)[starts]$name
   restart.vec <- t(numeric(vcount(g)))

@@ -71,13 +71,13 @@ imb <- function(g, v){
 #' @examples
 #' g <- ba.game(10)
 #' inDegree(g, V(g))
-inDegree <- function(g, v.set){
+in_degree <- function(g, v.set){
   v.set %>% vapply(checkVertex, numeric(1)) 
   if(!is.directed(g)) stop("Graph not directed.")
   igraph::degree(g, v = v.set,  mode = "in")
 }
-#' @rdname inDegree
-outDegree <- function(g, v.set){
+#' @rdname in_degree
+out_degree <- function(g, v.set){
   v.set %>% vapply(checkVertex, numeric(1))
   if(!is.directed(g)) stop("Graph not directed.")
   igraph::degree(g, v = v.set,  mode = "out")
@@ -88,20 +88,22 @@ outDegree <- function(g, v.set){
 #' 
 #' @param g an igraph directed graph
 #' @return chacter vector of vertex names
+#' @export
 #' @examples
 #' g <- ba.game(10)
 #' get_roots(g)
 get_roots <- function(g){
-  checkDirected(g)
-  g <- nameVertices(g)
-  V(g)[inDegree(g, V(g)) == 0] %>%
+  check_directed(g)
+  g <- name_vertices(g)
+  V(g)[in_degree(g, V(g)) == 0] %>%
     as.numeric
 }
 #' @rdname get_roots
+#' @export
 get_leaves <- function(g){
-  checkDirected(g)
-  g <- nameVertices(g)
-  V(g)[outDegree(g, V(g)) == 0] %>%
+  check_directed(g)
+  g <- name_vertices(g)
+  V(g)[out_degree(g, V(g)) == 0] %>%
     as.numeric
 }
 
@@ -114,14 +116,15 @@ get_leaves <- function(g){
 #' @param g an igraph directed graph
 #' @export
 #' @return the graph with the vertex attribute 'name'
-nameVertices <- function(g){
+name_vertices <- function(g){
   if(is.null(V(g)$name)){
     V(g)$name <- paste(V(g))
   }
   g
 }
-#' @rdname nameVertices
-nameEdges <- function(g){
+#' @rdname name_vertices
+#' @export
+name_edges <- function(g){
   if(is.null(E(g)$name)){
     el <- get.edgelist(g)
     E(g)$name <- apply(el, 1 , paste, collapse="->")
@@ -129,17 +132,7 @@ nameEdges <- function(g){
   g
 }
 
-# #' Enable indexing edges by name
-# #' @export
-# `[.igraph.es` <- function(x, i){
-#   ret <- try(igraph::`[.igraph.es`(x, i), silent=TRUE)
-#   if(class(ret) == "try-error"){
-#     ret <- x[x$name == i]
-#   }
-#   ret
-# }
-
-checkDirected <- function(g){
+check_directed <- function(g){
   if(!is.directed(g)) stop("Must be a directed graph.")
 }
   

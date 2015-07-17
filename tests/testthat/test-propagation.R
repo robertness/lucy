@@ -26,7 +26,7 @@ test_that("edge/vertex propagation only works with numeric indices or igraph ite
     determiner <- function(g, x)  {}
     callback <- function(g, x) g
     updater <- getUpdater(obj) 
-    g <- g %>% nameEdges %>% nameVertices 
+    g <- g %>% name_edges %>% name_vertices 
     S(g)$updated <- FALSE
     #Test the outcome is an igraph when using an iterator
     g.out <- updater(g, S(g)[1], determiner, callback)
@@ -48,8 +48,8 @@ test_that("edge/vertex propagation without a name or update attribute will throw
     callback <- function(g, x) g
     updater <- getUpdater(obj)
     # Confirm just having name attribute isn't sufficient
-    g <- nameEdges(g)
-    g <- nameVertices(g)
+    g <- name_edges(g)
+    g <- name_vertices(g)
     expect_error(updater(g, S(g)[1], determiner, callback),
                  "Either 'name' or 'updated' attribute missing.")
     # Confirm if both attributes are present, there is no issue
@@ -59,20 +59,20 @@ test_that("edge/vertex propagation without a name or update attribute will throw
 })
 
 test_that("callback function returns a graph object otherwise an error is thrown", {
-  g <- ba.game(30) %>% nameVertices
+  g <- ba.game(30) %>% name_vertices
   V(g)$value <- runif(30)
   V(g)$updated <- FALSE
   getProduct <- function(g, v) {
     V(g)[v]$value <- prod(V(g)[iparents(g, v)]$value)
     #This fails to return an igraph object, a common mistake
   }  
-  expect_error(updateVertices(g, iparents, getProduct), 
+  expect_error(update_vertices(g, iparents, getProduct), 
                "Your callback needs to return a valid igraph object.")
 })
 
 test_that("product of parents on a DAG works", {
   # See the vignette on proopagation for an explanation of this test.
-  g <- ba.game(10) %>% nameVertices
+  g <- ba.game(10) %>% name_vertices
   V(g)$value <- log(sample(1:50, 10))
   V(g)$updated <- FALSE
   getSum <- function(g, v) {
@@ -82,9 +82,9 @@ test_that("product of parents on a DAG works", {
     }
     g
   }
-  g.final <- updateVertices(g, iparents, getSum)
+  g.final <- update_vertices(g, iparents, getSum)
   leaf <- get_leaves(g)[1]
-  upstream.nodes <- getUpstreamNodes(g, leaf)
+  upstream.nodes <- get_upstream_nodes(g, leaf)
   expect_equal(V(g.final)[leaf]$value, sum(V(g)$value))
 })
 
@@ -139,14 +139,14 @@ test_that("method mirrors neural network prediction.",{
   #Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  
   #This function exists in *Lucy*, it is *iparents*.
   #Now we are ready for the propagation of values across the vertices.
-  g.final <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
+  g.final <- update_vertices(g, getDeterminers = iparents, callback = calculateNode)
   propagation.prediction <- round(V(g.final)$value, 2)
   names(propagation.prediction) <- V(g.final)$name
   #Comparing the original prediction to these results:
   expect_equal(nnet.prediction, propagation.prediction)
 })
 
-test_that("updateVertices doesn't have X wrong with it causing it to  go into
+test_that("update_vertices doesn't have X wrong with it causing it to  go into
           some infinite recursion", {})
 
 # test_that("Works on a cyclic directed graph with cycles", {
@@ -184,7 +184,7 @@ test_that("updateVertices doesn't have X wrong with it causing it to  go into
 # #updates
 # V(g)$updated <- FALSE
 # V(g)[c(inputs, "bias1", "bias2")]$updated <- TRUE
-# g <- updateVertices(g, getDeterminers = iparents, callback = calculateNode)
+# g <- update_vertices(g, getDeterminers = iparents, callback = calculateNode)
 # V(g)["case"]$value
 # test_that("can perform neural network.", {
 #   

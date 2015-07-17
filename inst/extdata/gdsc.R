@@ -23,6 +23,6 @@ calculateVals <- function(g, v){
     .[-1]
   g
 }
-g_fit <- updateVertices(g = g, function(g, v) NULL, calculateValues)
+g_fit <- update_vertices(g = g, function(g, v) NULL, calculateValues)
 save(g_fit, file="inst/extdata/g_fit.rda")
 

@@ -25,18 +25,18 @@ test_that("All functions edges/vertices on iterators take an numeric
             set.seed(10)
             g <- sim_DAG(50)
             checkVertexInputs <- function(v, up.str, down.str){
-              getDownstreamNodes(g, v)[5:9] %>%
+              get_downstream_nodes(g, v)[5:9] %>%
                 identical(c(12, 14, 16, 17, 18)) %>%
                 expect_true
               isBDownstreamOfA(g, a = up.str, b = down.str) %>%
                 expect_true
-              getUpstreamNodes(g, v) %>%
+              get_upstream_nodes(g, v) %>%
                 identical(c(1, 2, 3, 4, 5, 6, 7, 13, 15)) %>%
                 expect_true
-              getConnectingNodes(g, up.str, down.str)[15:20] %>% 
+              get_connecting_nodes(g, up.str, down.str)[15:20] %>% 
                 identical(c(18, 19, 20, 21, 22, 23)) %>%
                 expect_true
-              getConnectingEdges(g, up.str, down.str)[81:85] %>%
+              get_connecting_edges(g, up.str, down.str)[81:85] %>%
                 identical(c(120, 147, 148, 149, 150)) %>%
                 expect_true
               iparents(g, down.str)[5:10] %>%
@@ -45,17 +45,17 @@ test_that("All functions edges/vertices on iterators take an numeric
               ichildren(g, v)[5:10] %>%
                 identical(c(16, 18, 19, 22, 24, 26)) %>%
                 expect_true
-              inDegree(g, v) %>% 
+              in_degree(g, v) %>% 
                 identical(structure(9, names = "21")) %>%
                 expect_true
-              outDegree(g, v) %>%
+              out_degree(g, v) %>%
                 identical(structure(23, names = "21")) %>%
                 expect_true
-              V(nameVertices(g))[v] %>%
+              V(name_vertices(g))[v] %>%
                 as.numeric %>%
                 identical(21) %>%
                 expect_true
-              E(nameEdges(g))[to(v)] %>%
+              E(name_edges(g))[to(v)] %>%
                 as.numeric %>%
                 identical(c(11, 32, 46, 63,  89, 110, 130,236, 275)) %>%
                 expect_true
@@ -76,16 +76,16 @@ test_that("All functions that return edges or vertices return numerics",{
   v <- 21; up.str <- 1; down.str <- 40
   get_leaves(g) %>% is.numeric %>% expect_true
   get_roots(g) %>% is.numeric %>% expect_true
-  getDownstreamNodes(g, v)[5:9] %>%
+  get_downstream_nodes(g, v)[5:9] %>%
     identical(c(12, 14, 16, 17, 18)) %>%
     expect_true
-  getUpstreamNodes(g, v) %>%
+  get_upstream_nodes(g, v) %>%
     identical(c(1, 2, 3, 4, 5, 6, 7, 13, 15)) %>%
     expect_true
-  getConnectingNodes(g, up.str, down.str)[15:20] %>% 
+  get_connecting_nodes(g, up.str, down.str)[15:20] %>% 
     identical(c(18, 19, 20, 21, 22, 23)) %>%
     expect_true
-  getConnectingEdges(g, up.str, down.str)[81:85] %>%
+  get_connecting_edges(g, up.str, down.str)[81:85] %>%
     identical(c(120, 147, 148, 149, 150)) %>%
     expect_true
   iparents(g, down.str)[5:10] %>%
@@ -94,17 +94,17 @@ test_that("All functions that return edges or vertices return numerics",{
   ichildren(g, v)[5:10] %>%
     identical(c(16, 18, 19, 22, 24, 26)) %>%
     expect_true
-  inDegree(g, v) %>% 
+  in_degree(g, v) %>% 
     identical(structure(9, names = "21")) %>%
     expect_true
-  outDegree(g, v) %>%
+  out_degree(g, v) %>%
     identical(structure(23, names = "21")) %>%
     expect_true
-  V(nameVertices(g))[v] %>%
+  V(name_vertices(g))[v] %>%
     as.numeric %>%
     identical(21) %>%
     expect_true
-  E(nameEdges(g))[to(v)] %>%
+  E(name_edges(g))[to(v)] %>%
     as.numeric %>%
     identical(c(11, 32, 46, 63,  89, 110, 130,236, 275)) %>%
     expect_true
@@ -117,9 +117,9 @@ test_that("Functions that take single vertices/edges as arguments error out when
             v <- 21; down.str <- 40
             w <- c(20, 21, 22)
             vlist <- list(
-              getDownstreamNodes,
-              getUpstreamNodes,
-              function(g, v) getConnectingNodes(g, src = v, trg = down.str),
+              get_downstream_nodes,
+              get_upstream_nodes,
+              function(g, v) get_connecting_nodes(g, src = v, trg = down.str),
               iparents,
               ichildren)
             lapply(vlist, function(func){
@@ -128,6 +128,6 @@ test_that("Functions that take single vertices/edges as arguments error out when
           })
 
 test_that("edge name should not return any NAs", {
-  g <- sim_DAG(50) %>% nameEdges
+  g <- sim_DAG(50) %>% name_edges
   E(g)$name %>% is.na %>% any %>% expect_false
 })

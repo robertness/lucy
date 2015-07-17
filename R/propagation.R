@@ -83,7 +83,7 @@ getTraverser <- function(iterator){
 #' not have the status \code{updated == TRUE}, then the function recursively performs the callback on the determiners until all 
 #' their states are updated, before finalling performing the callback on the original vertex/edge.
 #' 
-#' \code{updateVertices} performs propagation on vertices. \code{updateEdges} performs propagation on edges.  
+#' \code{update_vertices} performs propagation on vertices. \code{updateEdges} performs propagation on edges.  
 #'   
 #' @param g A graph object.
 #' @param getDeterminers A function returns the vertice/edge indices that must be updated for the callback to be 
@@ -94,28 +94,8 @@ getTraverser <- function(iterator){
 #' @return A igraph object with updated vertex/edge states. A warning message is returned if not all vertices 
 #' could be updated.
 #' @export
-updateVertices <- getTraverser("vertex")
+update_vertices <- getTraverser("vertex")
 
-#' @describeIn updateVertices 
-updateEdges <- getTraverser("edge")
-
-#' Graph Traversal
-#' 
-#' This uses the igraph traversal algorithms to produce a perhaps a better ordering of 
-#' vertexs in the traversal done in the updating.  Not yet used, may be applied later to
-#' improve speed, or when a callback is needed to stop the traversal in the event of cycles.   
-getOrdering <- function(g, S, traversal = "depth.first"){
-  list(breadth.first =
-         function() graph.bfs(g, root = V(g)[1], 
-                              neimode = "out", 
-                              unreachable = TRUE, 
-                              order = TRUE)$order,
-       depth.first = 
-         function() graph.dfs(g, root = V(g)[1], 
-                              neimode = "out", 
-                              unreachable = TRUE, 
-                              order = TRUE)$order)[[traversal]]
-}
-
-
-
+#' @describeIn update_vertices 
+#' @export
+update_edges <- getTraverser("edge")

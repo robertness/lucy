@@ -14,7 +14,7 @@
 #' igraphviz(g)
 #' @export
 igraphviz <- function(g, main = NULL){
-  g <- nameVertices(g)
+  g <- name_vertices(g)
   gnell <- g %>% igraph.to.graphNEL %>% {Rgraphviz::layoutGraph(.)}
   Rgraphviz::layoutGraph(gnell, nodeAttrs=list(label=structure(V(g)$name, names=V(g)$name)))
   if(!is.null(main)) graph::graph.par(list(graph = list(main = main))) # Add a title if one is given
@@ -34,17 +34,17 @@ igraphviz <- function(g, main = NULL){
 #' plot_path(g, 4, 11)
 #' @export
 plot_path <- function(g, src, trg, main = NULL){
-  if(!(trg %in% getDownstreamNodes(g, src))) stop("Target is not downstream of the source.")
+  if(!(trg %in% get_downstream_nodes(g, src))) stop("Target is not downstream of the source.")
   node_list <- {rep("green", 2)} %>% 
     structure(names = V(g)[c(src, trg)]$name) %>%
     {list(fill = .)} 
-  edge_list <- V(g)[getConnectingNodes(g, src, trg)] %>%
+  edge_list <- V(g)[get_connecting_nodes(g, src, trg)] %>%
     {E(g)[. %->% .]} %>%
     {get.edgelist(g)[., , drop = F]} %>% 
     apply(1, paste0, collapse="~") %>%
     {structure(rep("green", length(.)), names = .)} %>%
     {list(col = .)}
-  g_out <- g %>% nameVertices %>% # Give vertices names if they do not have nay 
+  g_out <- g %>% name_vertices %>% # Give vertices names if they do not have nay 
     igraph.to.graphNEL(.) %>% # convert to a graphNEL
     {Rgraphviz::layoutGraph(.)} %>% # lay the graph out
     {graph::`nodeRenderInfo<-`(., node_list)} %>% # add the node annotation
