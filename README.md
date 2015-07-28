@@ -12,4 +12,4 @@ This package is currently in development and not yet released on CRAN.
 To get the current development version from github:
 
     # install.packages("devtools")
-    devtools::install_github("osazuwa223/lucy")
+    devtools::install_github("robertness/lucy")

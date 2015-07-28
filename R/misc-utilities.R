@@ -47,12 +47,14 @@ iparents <- function(g, v){
   V(g)[nei(v, mode="in")] %>% as.numeric
 }
 #' @rdname iparents
+#' @export
 ichildren <- function(g, v){
   v <- checkVertex(v)
   if(!is.directed(g)) stop("g must be a directed graph")
   V(g)[nei(v, mode="out")] %>% as.numeric
 }
 #' @rdname iparents
+#' @export
 imb <- function(g, v){
   v <- checkVertex(v)
   if(!is.directed(g)) stop("g must be a directed graph")
@@ -143,7 +145,7 @@ check_directed <- function(g){
 #' @param node 'from' for from node, 'to' for to-node 
 #' @return numeric of the vertex index
 #' @export
-getEdgeVertex <- function(g, e, node = c("from", "to")){
+get_edge_vertex <- function(g, e, node = c("from", "to")){
   el <- get.edgelist(g)
   colnames(el) <- c("from", "to")
   V(g)[el[e, node]] %>% as.numeric
