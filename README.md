@@ -1,10 +1,6 @@
 # lucy
 
-*lucy* creates higher level graph operations build upon the basic graph data structure and graph operations found in igraph.  A simple example is the function *iparents*, which returns the parents of a node in a graph, as opposed to having to write: 
-
-    V(g)[nei(v, mode="out")]
-
-*lucy* is useful to anyone who likes using *igraph* as their primary tool for working with graph data structures.
+*lucy* is a wrapper for the popular [igraph](http://igraph.org/r/) package.  Though built with applications to probabilistic graphical models (eg. Bayesian networks and artificial neural networks) in mind, *lucy* is generally useful to anyone who likes using *igraph* as a workhorse for manipulating graph data structures.
 
 ## Installation
 This package is currently in development and not yet released on CRAN.

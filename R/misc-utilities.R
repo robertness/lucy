@@ -151,4 +151,18 @@ get_edge_vertex <- function(g, e, node = c("from", "to")){
   V(g)[el[e, node]] %>% as.numeric
 }
 
+#' Reverse the edges of a directed graph
+#' 
+#' Return a new directed graph instance with each edge oriented in the opposite direction 
+#' relative to the corresponding edge in the input graph.  Will not preserve graph, vertex,
+#' and edge attributes.  
+#' @param g a directed igraph object
+#' @return a new igraph object, the old graph with edges reverse.  
+#' @export
+reverse_edges <- function(g){
+  g %>%
+    get.edgelist %>%
+    {cbind(.[, 2], .[, 1])} %>%
+    graph.edgelist
+}
 
