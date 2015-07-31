@@ -154,7 +154,6 @@ layer_DAGs <- function(k, n, method = "ic-dag"){
 power_law_sim <- function(g, n){
   in_degree <- igraph::degree(g, mode = "in") 
   out_degree_dist <- igraph::degree.distribution(g, mode = "out")
-  out_degree_dist[1] <- 0
   fit <- igraph::power.law.fit(in_degree + 1)
   if(fit$KS.p < .1) warning("Graph degree distribution is a poor fit to a power law.")
   igraph::barabasi.game(n, power = fit$alpha, out.dist = out_degree_dist)
