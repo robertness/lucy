@@ -64,6 +64,36 @@ imb <- function(g, v){
   unique(c(parents, children, parents_of_children))
 }
 
+#' Select vertices from a sequence
+#' 
+#' Given a vertex sequence (class igraph.vs), selects the first, last, or a random vertex from
+#' the sequence
+#' @param g igraph object
+#' @param s an object of class igraph.vs
+#' @return the index of a vertex from the sequence
+#' @export
+first_v <- function(g, s){
+  if(!(class(s) == "igraph.vs")) stop("Must supply object of class igraph.vs")
+  g <- name_vertices(g)
+  s <- V(g)[s]
+  return(as.numeric(V(g)[V(g)[s]$name[1]]))
+}
+#' @rdname first_v
+#' @export
+last_v <- function(g, s){
+  if(!(class(s) == "igraph.vs")) stop("Must supply object of class igraph.vs")
+  g <- name_vertices(g)
+  s <- V(g)[s]
+  return(as.numeric(V(g)[V(g)[s]$name[length(s)]]))
+}
+#' @rdname first_v
+#' @export
+random_v <- function(g, s){
+  if(!(class(s) == "igraph.vs")) stop("Must supply object of class igraph.vs")
+  g <- name_vertices(g)
+  s <- V(g)[s]
+  return(V(g)[V(g)[s]$name[sample(length(s), 1)]])
+}
 
 #' In/Out-degree of a set of vertices in a directed graph
 #' 

@@ -10,7 +10,7 @@
 #' attribute called "layer" that describes whether it is an input, output, or
 #' hidden layer node.
 #' @examples
-#' g <- mlp_graph(c("I1", "I2"), c(3, 2, 4), c("O1", "O2", "O3"))
+#' g <- mlp_graph(c("I1", "I2"), c("O1", "O2", "O3"), c(3, 2, 4))
 #' igraphviz(g)
 #' @export
 mlp_graph <- function(inputs, outputs, layers = NULL){
@@ -156,5 +156,8 @@ power_law_sim <- function(g, n){
   out_degree_dist <- igraph::degree.distribution(g, mode = "out")
   fit <- igraph::power.law.fit(in_degree + 1)
   if(fit$KS.p < .1) warning("Graph degree distribution is a poor fit to a power law.")
-  igraph::barabasi.game(n, power = fit$alpha, out.dist = out_degree_dist)
+  deviation <- abs(alpha_power_table$alpha - fit$alpha)
+  # Map fitted alpha back to power using a lookup table.
+  power <- alpha_power_table$power[deviation == min(deviation)][1]
+  igraph::barabasi.game(n, power = power, out.dist = out_degree_dist)
 }

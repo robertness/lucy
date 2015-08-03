@@ -23,7 +23,7 @@ hidden layer node.
 Generate a multi-layer perceptron graph structure.
 }
 \examples{
-g <- mlp_graph(c("I1", "I2"), c(3, 2, 4), c("O1", "O2", "O3"))
+g <- mlp_graph(c("I1", "I2"), c("O1", "O2", "O3"), c(3, 2, 4))
 igraphviz(g)
 }
 

@@ -7,23 +7,40 @@
 # Random Graph Generation with Lucy
 
 ```{r, message=FALSE}
-#devtools::install_github("osazuwa223/lucy")
+#devtools::install_github("robertness/lucy")
 library(lucy)
 ```
 
 Some functions that generate highly connected DAGs that are common in neural networks, neural networks, signaling networks, and Bayesian networks.
 
-```{r, message=FALSE}
+Simulate a directed acyclic graph (DAG).
+```{r, eval= FALSE, message=FALSE}
 g <- sim_DAG(10)
 igraphviz(g)
 ```
+![dag](http://i.imgur.com/FCJEPsw.png)
 
-```{r}
+Simulate a multi-layer perceptron structure.
+```{r, eval = FALSE, message = FALSE}
+g <- mlp_graph(c("I1", "I2"), c("O1", "O2", "O3"), c(3, 2, 4))
+igraphviz(g)
+```
+![mlp](http://i.imgur.com/lcvgoP9.png)
+
+Simulate a DAG composed of stacked layers (a generalization of a mulilayer perceptron).
+```{r, eval = FALSE, message = FALSE}
 g <- layer_DAGs(3, 4)
 igraphviz(g)
 ```
+![layered_dag](http://i.imgur.com/tNbUMkv.png)
 
-```{r}
-g <- layer_DAGs(6, 3)
-igraphviz(g)
+Given a input network that has a power-law degree distribution (scale-free network), fit the parameters of that power law and simulate a new network based on that fit.  The simulated graph need not have the same amount of vertices as the input graph.  
+
+```{r, eval = FALSE, message = FALSE}
+power_law_graph <- ba.game(40)
+sim_graph <- power_law_sim(power_law_graph, 40)
+par(mfrow=(c(1, 2)))
+igraphviz(power_law_graph, main = "Input Graph")
+igraphviz(sim_graph, main = "Simulated Graph")
 ```
+![power law sim](http://i.imgur.com/gCthk40.png)

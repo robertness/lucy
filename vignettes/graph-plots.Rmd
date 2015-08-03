@@ -7,7 +7,7 @@
 # Useful visualizations using lucy
 
 ```{r, message=FALSE}
-#devtools::install_github("osazuwa223/lucy")
+#devtools::install_github("robertness/lucy")
 library(lucy)
 set.seed(20)
 ```
