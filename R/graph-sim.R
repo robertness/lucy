@@ -158,6 +158,6 @@ power_law_sim <- function(g, n){
   if(fit$KS.p < .1) warning("Graph degree distribution is a poor fit to a power law.")
   deviation <- abs(alpha_power_table$alpha - fit$alpha)
   # Map fitted alpha back to power using a lookup table.
-  power <- alpha_power_table$power[deviation == min(deviation)][1]
-  igraph::barabasi.game(n, power = power, out.dist = out_degree_dist)
+  gamma <- gamma_alpha_table$gamma[deviation == min(deviation)][1]
+  igraph::barabasi.game(n, power = gamma, out.dist = out_degree_dist)
 }
