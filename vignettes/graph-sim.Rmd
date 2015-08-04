@@ -37,7 +37,7 @@ igraphviz(g)
 Given a input network that has a power-law degree distribution (scale-free network), fit the parameters of that power law and simulate a new network based on that fit.  The simulated graph need not have the same amount of vertices as the input graph.  
 
 ```{r, eval = FALSE, message = FALSE}
-power_law_graph <- ba.game(40)
+power_law_graph <- barabasi.game(40)
 sim_graph <- power_law_sim(power_law_graph, 40)
 par(mfrow=(c(1, 2)))
 igraphviz(power_law_graph, main = "Input Graph")
