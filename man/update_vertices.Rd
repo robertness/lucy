@@ -5,14 +5,14 @@
 \alias{update_vertices}
 \title{Vertex/Edge Propagation in igraph}
 \usage{
-update_vertices(g, getDeterminers, callback)
+update_vertices(g, get_determiners, callback)
 
-update_edges(g, getDeterminers, callback)
+update_edges(g, get_determiners, callback)
 }
 \arguments{
 \item{g}{A graph object.}
 
-\item{getDeterminers}{A function returns the vertice/edge indices that must be updated for the callback to be
+\item{get_determiners}{A function returns the vertice/edge indices that must be updated for the callback to be
 executed.  Arguments: g - the graph object, i - the index of a vertex/edge in g. Returns: an array of indices
 for the vertices/edges that are needed to perform the callback on vertex/edge i.}
 

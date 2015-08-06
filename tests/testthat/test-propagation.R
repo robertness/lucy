@@ -1,72 +1,64 @@
 context("Graph Propagation")
 
 g <- ba.game(100)
-graph.objects <- c("edge", "vertex")
+devtools::load_all()
 
-test_that("setIterator sets both the iterator function and iterator replacement function.", {
-  lapply(graph.objects, function(obj) {
-    setIterator(obj)
-    expect_true(class(S(g)) %in% c("igraph.es", "igraph.vs"))
-    S(g)$new.attribute <- "foobar"
-    expect_equal(S(g)$new.attribute[1], "foobar")
-  })
+test_that("vertex propagation only works with numeric indices or igraph iterators.", {
+  determiner <- function(g, x)  {}
+  callback <- function(g, x) g
+  g <- g %>% name_edges %>% name_vertices 
+  V(g)$updated <- FALSE
+  #Test the outcome is an igraph when using an iterator
+  g.out <- vertex_updater(g, V(g)[1], determiner, callback)
+  expect_true(is.igraph(g.out))
+  #Test the same result comes out with a numeric index
+  vertex_updater(g, as.numeric(V(g)[1]), determiner, callback) %>%
+    identical(g.out) %>%
+    expect_true
+  #Should get an indexing error if trying to index with a name.
+  expect_error(vertex_updater(g, V(g)[1]$name, determiner, callback),
+               "Refer to edges/vertices with an integer, numeric, or igraph iterators")
 })
 
-test_that("getUpdater closure creates vertex updater and edge updater with the correct arguments.", {
-  lapply(graph.objects, function(obj){ #For the E edge iterator and V vertex iterator functions
-    getUpdater(obj) %>% #create an updater
-      formals %>% names %>% #get the arguments of the resulting closure
-      expect_equal(c("g", "object", "getDeterminers","callback")) #make sure args are as expected.    
-  })
+test_that("edge propagation only works with numeric indices or igraph iterators.", {
+  determiner <- function(g, x)  {}
+  callback <- function(g, x) g
+  g <- g %>% name_edges %>% name_vertices 
+  E(g)$updated <- FALSE
+  #Test the outcome is an igraph when using an iterator
+  g.out <- edge_updater(g, E(g)[1], determiner, callback)
+  expect_true(is.igraph(g.out))
+  #Test the same result comes out with a numeric index
+  edge_updater(g, as.numeric(E(g)[1]), determiner, callback) %>%
+    identical(g.out) %>%
+    expect_true
+  #Should get an indexing error if trying to index with a name.
+  expect_error(edge_updater(g, E(g)[1]$name, determiner, callback),
+               "Refer to edges/vertices with an integer, numeric, or igraph iterators")
 })
 
-test_that("edge/vertex propagation only works with numeric indices or igraph iterators.", {
-  lapply(graph.objects, function(obj){
-    setIterator(obj)
-    determiner <- function(g, x)  {}
-    callback <- function(g, x) g
-    updater <- getUpdater(obj) 
-    g <- g %>% name_edges %>% name_vertices 
-    S(g)$updated <- FALSE
-    #Test the outcome is an igraph when using an iterator
-    g.out <- updater(g, S(g)[1], determiner, callback)
-    expect_true(is.igraph(g.out))
-    #Test the same result comes out with a numeric index
-    updater(g, as.numeric(S(g)[1]), determiner, callback) %>%
-      identical(g.out) %>%
-      expect_true
-    #Should get an indexing error if trying to index with a name.
-    expect_error(updater(g, S(g)[1]$name, determiner, callback),
-                 "Refer to edges/vertices with an integer, numeric, or igraph iterators")
-  })
-})
-
-test_that("edge/vertex propagation without a name or update attribute will throw error. ", {
-  lapply(graph.objects, function(obj){
-    setIterator(obj)
-    determiner <- function(g, x)  {}
-    callback <- function(g, x) g
-    updater <- getUpdater(obj)
+test_that("vertex propagation without a name or update attribute will throw error. ", {
+  determiner <- function(g, x)  {}
+  callback <- function(g, x) g
     # Confirm just having name attribute isn't sufficient
-    g <- name_edges(g)
-    g <- name_vertices(g)
-    expect_error(updater(g, S(g)[1], determiner, callback),
+  g <- name_edges(g)
+  g <- name_vertices(g)
+  expect_error(vertex_updater(g, E(g)[1], determiner, callback),
                  "Either 'name' or 'updated' attribute missing.")
     # Confirm if both attributes are present, there is no issue
-    S(g)$updated <- FALSE
-    expect_true(is.igraph(updater(g, S(g)[1], determiner, callback)))
-  })
+  V(g)$updated <- FALSE
+  expect_true(is.igraph(vertex_updater(g, V(g)[1], determiner, callback)))
 })
 
 test_that("callback function returns a graph object otherwise an error is thrown", {
   g <- ba.game(30) %>% name_vertices
   V(g)$value <- runif(30)
   V(g)$updated <- FALSE
-  getProduct <- function(g, v) {
+  get_product <- function(g, v) {
     V(g)[v]$value <- prod(V(g)[iparents(g, v)]$value)
     #This fails to return an igraph object, a common mistake
   }  
-  expect_error(update_vertices(g, iparents, getProduct), 
+  expect_error(update_vertices(g, iparents, get_product), 
                "Your callback needs to return a valid igraph object.")
 })
 
@@ -131,15 +123,15 @@ test_that("method mirrors neural network prediction.",{
   #The activation function is what calculates the value of a node given its parents.  So I use it to create a callback called *calculateNode*. 
   calculateNode <- function(g, v){
     parents <- iparents(g, v)
-    #wts <- E(g)[parents %->% v]$weight
-    wts <- igraph::`[.igraph.es`(E(g), parents %->% v)$weight
+    wts <- E(g)[parents %->% v]$weight
+    #wts <- igraph::`[.igraph.es`(E(g), parents %->% v)$weight
     V(g)[v]$value <- activate(sum(V(g)[parents]$value * wts)) 
     g
   }
-  #Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  
+  #Since the state of each node is determined by the state of its parent nodes, the *get_determiners* function should only return the parents of the node.  
   #This function exists in *Lucy*, it is *iparents*.
   #Now we are ready for the propagation of values across the vertices.
-  g.final <- update_vertices(g, getDeterminers = iparents, callback = calculateNode)
+  g.final <- update_vertices(g, get_determiners = iparents, callback = calculateNode)
   propagation.prediction <- round(V(g.final)$value, 2)
   names(propagation.prediction) <- V(g.final)$name
   #Comparing the original prediction to these results:
@@ -184,7 +176,7 @@ test_that("update_vertices doesn't have X wrong with it causing it to  go into
 # #updates
 # V(g)$updated <- FALSE
 # V(g)[c(inputs, "bias1", "bias2")]$updated <- TRUE
-# g <- update_vertices(g, getDeterminers = iparents, callback = calculateNode)
+# g <- update_vertices(g, get_determiners = iparents, callback = calculateNode)
 # V(g)["case"]$value
 # test_that("can perform neural network.", {
 #   

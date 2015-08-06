@@ -26,9 +26,9 @@ When variables are vertices/nodes (I use the terms interchangebly) or edges in a
 
 *Lucy* builds the basis for such propogations using igraph.
 
-Propagation is done with one of either two functions, *update_vertices* or *update_edges*, which predictably do propagation on edges or on vertices.  Each take an igraph object as an argument, as well as two other key arguments; functions "getDeterminers" and "callback".  
+Propagation is done with one of either two functions, *update_vertices* or *update_edges*, which predictably do propagation on edges or on vertices.  Each take an igraph object as an argument, as well as two other key arguments; functions "get_determiners" and "callback".  
 
-*getDeterminers* must be a function that takes the arguments *g* for a graph object, and *obj*, which is a character naming either a vertex or an edge in the graph g.
+*get_determiners* must be a function that takes the arguments *g* for a graph object, and *obj*, which is a character naming either a vertex or an edge in the graph g.
 
 ```{r, echo=FALSE,message=FALSE}
 library(plyr, quietly = T)
@@ -63,7 +63,7 @@ getSum <- function(g, v) {
 }
 ```
 
-The calculation for each node depends on the parents, so the *getDeterminers* argument for the *update_vertices* function will be *iparents*.
+The calculation for each node depends on the parents, so the *get_determiners* argument for the *update_vertices* function will be *iparents*.
 
 ```{r}
 g.final <- update_vertices(g, iparents, getSum)
@@ -153,24 +153,24 @@ The activation function in the neural network is the logistic function:
 activate <- function(x)  1 / (1 + exp(-x))
 ```
 
-The activation function is what calculates the value of a node given its parents.  So I use it to create a callback called *calculateNode*. 
+The activation function is what calculates the value of a node given its parents.  So I use it to create a callback called *calculate_node*. 
 
 ```{r}
-calculateNode <- function(g, v){
+calculate_node <- function(g, v){
   parents <- iparents(g, v)
-  #wts <- E(g)[parents %->% v]$weight
-  wts <- igraph::`[.igraph.es`(E(g), parents %->% v)$weight
+  wts <- E(g)[parents %->% v]$weight
+  #wts <- igraph::`[.igraph.es`(E(g), parents %->% v)$weight
   V(g)[v]$value <- activate(sum(V(g)[parents]$value * wts)) 
   g
 }
 ```
 
-Since the state of each node is determined by the state of its parent nodes, the *getDeterminers* function should only return the parents of the node.  This function exists in *Lucy*, it is *iparents*.
+Since the state of each node is determined by the state of its parent nodes, the *get_determiners* function should only return the parents of the node.  This function exists in *Lucy*, it is *iparents*.
 
 Now we are ready for the propagation of values across the vertices.
 
 ```{r}
-g.final <- update_vertices(g, getDeterminers = iparents, callback = calculateNode)
+g.final <- update_vertices(g, get_determiners = iparents, callback = calculate_node)
 propagation.prediction <- V(g.final)$value
 names(propagation.prediction) <- V(g.final)$name
 ```
