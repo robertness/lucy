@@ -151,13 +151,33 @@ layer_DAGs <- function(k, n, method = "ic-dag"){
 #' @param n number of desired vertices in the output graph
 #' @return a new igraph object.
 #' @export
-power_law_sim <- function(g, n){
-  in_degree <- igraph::degree(g, mode = "in") 
+power_law_sim <- function(g, n){  
+  gamma <- fit_barabasi_power(g)
   out_degree_dist <- igraph::degree.distribution(g, mode = "out")
-  fit <- igraph::power.law.fit(in_degree + 1)
-  if(fit$KS.p < .1) warning("Graph degree distribution is a poor fit to a power law.")
-  deviation <- abs(gamma_alpha_table$alpha - fit$alpha)
-  # Map fitted alpha back to power using a lookup table.
-  gamma <- gamma_alpha_table$gamma[deviation == min(deviation)][1]
   igraph::barabasi.game(n, power = gamma, out.dist = out_degree_dist)
+}
+
+#' Use input graph to estimate power of preferential attachment for Barabasi-Albert algorithm.
+#' Fits a power law to the input graph and returns the value to use as the power of
+#' preferential attachment in a Barabasi-Albert simulation of a scale-free network.  This
+#' is the 'power' argument in igraph's 'barabasi.game" function.
+#' @param g an input igraph object, the power law will be simulated from this object.
+#' @param mle if TRUE, estimate the power value of the out-degree distribution using mle via
+#' BFGS optimization.  If FALSE, use the 'plfit' implementation (see the power.law.fit function
+#' in igraph).  Default is FALSE.  FALSE option will generate a warning if a bad fit is detected
+#' but the TRUE option will not.
+#' @return a numeric value.
+#' @export
+fit_barabasi_power <- function(g, mle = FALSE){
+  in_degree <- igraph::degree(g, mode = "in") 
+  if(mle){
+    fit <- igraph::power.law.fit(in_degree + 1, implementation = "r.mle")
+    deviation <- abs(gamma_alpha_table$alpha - as.numeric(fit@coef))
+  }else{
+    fit <- igraph::power.law.fit(in_degree + 1, implementation = "plfit")
+    deviation <- abs(gamma_alpha_table$alpha - fit$alpha)
+    if(fit$KS.p < .1) warning("Graph degree distribution is a poor fit to a power law.")
+  } 
+  # Map fitted alpha back to power using a lookup table.
+  gamma_alpha_table$gamma[deviation == min(deviation)][1]
 }
