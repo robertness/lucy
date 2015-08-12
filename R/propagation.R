@@ -119,7 +119,7 @@ update_edges <- function(g, get_determiners, callback){
   }
   if(!all(V(g)$updated)){
     warning("The following were not updated: ", 
-            paste(paste(get_edge_vertex(E(g)[!updated], collapse = "<-")), collapse = ", ")
+            paste(paste(get_edge_vertex(E(g)[!updated]), collapse = "<-"), collapse = ", ")
     )
   }
   g
