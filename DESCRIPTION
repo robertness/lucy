@@ -1,18 +1,23 @@
 Package: lucy
 Type: Package
-Title: Really useful things done with graphs. 
+Title: Really useful things done with graphs.
 Version: 0.1
 Author: Robert Ness
-Description: Lucy is for people who think about statistics and machine learning problems in terms of graphs.
-             The core data structure is the igraph object.  In addition to handy extentions to igraph functions and 
-             visualization of igraph objects, Lucy implements graph algorithms that are useful across various areas of 
-             statistics and machine learning.
+Description: Lucy is for people who think about statistics and machine learning
+    problems in terms of graphs. The core data structure is the igraph object. In
+    addition to handy extentions to igraph functions and visualization of igraph
+    objects, Lucy implements graph algorithms that are useful across various areas
+    of statistics and machine learning.
 License: GPL-2
-Depends: R (>= 2.14),
-         igraph (>= 0.7.1),
-         Rgraphviz,
-         magrittr
-Imports: bnlearn
-Suggests: knitr,
-          testthat 
+Depends:
+    R (>= 2.14),
+    igraph (>= 0.7.1),
+    Rgraphviz,
+    magrittr
+Imports:
+    bnlearn
+Suggests:
+    knitr,
+    testthat
 VignetteBuilder: knitr
+RoxygenNote: 5.0.1

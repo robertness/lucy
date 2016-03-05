@@ -181,6 +181,23 @@ get_edge_vertex <- function(g, e, node = c("from", "to")){
   V(g)[el[e, node]] %>% as.numeric
 }
 
+#' Reverse an edge in a directed graph
+#' 
+#' Return a new directed graph instance a given edge oriented in the opposite direction 
+#' relative to the input graph.  Will not preserve graph, vertex,
+#' and edge attributes.  
+#' @param g a directed igraph object
+#' @param e an edge (integer index or "igraph.es" object)
+#' @return a new igraph object, the old graph with edges reverse.  
+#' @export
+reverse_edge <- function(g, e){
+  check_directed(g)
+  g %>%
+    get.edgelist %>%
+    {.[e, ] <- c(.[e, 2], .[e, 1]); .} %>%
+    graph.edgelist
+}
+
 #' Reverse the edges of a directed graph
 #' 
 #' Return a new directed graph instance with each edge oriented in the opposite direction 
@@ -190,9 +207,31 @@ get_edge_vertex <- function(g, e, node = c("from", "to")){
 #' @return a new igraph object, the old graph with edges reverse.  
 #' @export
 reverse_edges <- function(g){
+  check_directed(g)
   g %>%
     get.edgelist %>%
     {cbind(.[, 2], .[, 1])} %>%
     graph.edgelist
 }
 
+#' Find a cycle
+#' Returns the first cycle detected in the graph.  Relies on shortest path calculations.
+#' If there is a "weight" edge attribute, it will be incorporated in the shortest edge
+#' calculation.
+#' @export
+detect_cycle <- function(g){
+  if(!is_directed(g)) stop("g is not directed.")
+  for(v in V(g)){ 
+    children <- V(g)[ichildren(g, v)]
+    if(length(children) > 0){
+      for(w in children){
+        path <- suppressWarnings(shortest_paths(g, from = w, to = v, output = "epath"))$epath[[1]]
+        if(length(path) != 0){
+          path <- c(path, E(g)[get.edge.ids(g, c(v, w))])
+          return(sort(path))
+        } 
+      }
+    }
+  }
+  NULL
+}

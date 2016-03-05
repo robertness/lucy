@@ -129,7 +129,8 @@ get_connecting_edges <- function(g, src, trg){
   as.numeric(output.edges)
 }
 
-random_walk <- function(g, starts, r = 0, use.weights = F){
+#' Random Walk with Restarts
+rw_restarts <- function(g, starts, r = 0, use.weights = F){
   if(!use.weights) E(g)$weight <- 1
   starts.name <- V(g)[starts]$name
   restart.vec <- t(numeric(vcount(g)))

@@ -24,8 +24,10 @@ checkAttributes <- function(g, S){
 #' @param e an index for an edge in g
 #' @param get_determiners a function that returns the indices of the edges that must be updated
 #' before the callback is executed.
+#' @param verbose if TRUE prints out details of propagation
 #' @param a function that performs an operation on an edge.
-vertex_updater <- function(g, v, get_determiners, callback){
+#' @export
+vertex_updater <- function(g, v, get_determiners, callback, verbose = FALSE){
   checkIndex(v)
   checkAttributes(g, V)
   #message("#", rec.level, " level recursion for ", "vertex updater")
@@ -35,6 +37,11 @@ vertex_updater <- function(g, v, get_determiners, callback){
       test.determiners.unupdated <- !V(g)[V(g) %in% determiners]$updated
       if(any(test.determiners.unupdated)){
         unupdated.determiners <- determiners[test.determiners.unupdated]
+        if(verbose) {
+          g <- name_vertices(g)
+          message("propagating to vertices ",
+                   paste(V(g)[unupdated.determiners]$name, collapse = ", "))
+        }
         for(d in unupdated.determiners){
           g <- vertex_updater(g, d, get_determiners, callback)
         }
@@ -64,12 +71,13 @@ vertex_updater <- function(g, v, get_determiners, callback){
 #' for the vertices/edges that are needed to perform the callback on vertex/edge i.
 #' @param callback The function performed on each vertex/edge. Arguments: g - the graph object, i - the index of a graph/edge in g.
 #' Returns: a graph object.
+#' @param verbose if TRUE prints out details of propagation
 #' @return A igraph object with updated vertex/edge states. A warning message is returned if not all vertices 
 #' could be updated.
 #' @export
-update_vertices <- function(g, get_determiners, callback){
+update_vertices <- function(g, get_determiners, callback, verbose = FALSE){
   for(v in V(g)){
-    g <- vertex_updater(g, v, get_determiners, callback) 
+    g <- vertex_updater(g, v, get_determiners, callback, verbose = verbose) 
   }
   if(!all(V(g)$updated)){
     warning("The following were not updated: ", 
@@ -89,7 +97,9 @@ update_vertices <- function(g, get_determiners, callback){
 #' @param get_determiners a function that returns the indices of the edges that must be updated
 #' before the callback is executed.
 #' @param a function that performs an operation on an edge.
-edge_updater <- function(g, e, get_determiners, callback){
+#' @param verbose if TRUE prints out details of propagation
+#' @export
+edge_updater <- function(g, e, get_determiners, callback, verbose = FALSE){
   checkIndex(e)
   checkAttributes(g, E)
   e <- as.numeric(e)
@@ -99,6 +109,15 @@ edge_updater <- function(g, e, get_determiners, callback){
       test.determiners.unupdated <- !E(g)[E(g) %in% determiners]$updated
       if(any(test.determiners.unupdated)){
         unupdated.determiners <- determiners[test.determiners.unupdated]
+        if(verbose) {
+          g <- name_vertices(g)
+          unupdated.determiners.names <- unlist(
+            lapply(unupdated.determiners, function(det_e){
+              paste(V(g)[get_edge_vertex(g, det_e)]$name, collapse = "->")
+            })
+          )
+          message("propagating to edges ", paste(unupdated.determiners.names, collapse = ", "))
+        }
         for(d in unupdated.determiners){
           g <- updater(g, d, get_determiners, callback)
         }
@@ -113,9 +132,9 @@ edge_updater <- function(g, e, get_determiners, callback){
 
 #' @describeIn update_vertices 
 #' @export
-update_edges <- function(g, get_determiners, callback){
+update_edges <- function(g, get_determiners, callback, verbose = FALSE){
   for(e in E(g)){
-    g <- edge_updater(g, e, get_determiners, callback) 
+    g <- edge_updater(g, e, get_determiners, callback, verbose = verbose) 
   }
   if(!all(V(g)$updated)){
     warning("The following were not updated: ", 
