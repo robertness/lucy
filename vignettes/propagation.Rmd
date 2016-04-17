@@ -36,7 +36,6 @@ library(dplyr, quietly = T)
 library(reshape, quietly = T)
 library(lucy, quietly = T)
 library(bnlearn, quietly = T)
-library(magrittr, quietly = T)
 ```
 
 ## Example 1: Propagation of sums in a directed Network
@@ -72,11 +71,11 @@ g.final <- update_vertices(g, iparents, getSum)
 The results:
 
 ```{r, echo=FALSE, message=FALSE}
-  V(g)$name <- round(V(g)$value, 2)
-  V(g.final)$name <-round(V(g.final)$value,2)
-  par(mfrow = c(1,2))
-  igraphviz(g)
-  igraphviz(g.final, main="After Propagation")
+V(g)$name <- round(V(g)$value, 2)
+V(g.final)$name <-round(V(g.final)$value,2)
+par(mfrow = c(1,2))
+igraphviz(g)
+igraphviz(g.final, main="After Propagation")
 ```
 
 ## Example 2: Prediction on a multi-layer perceptron

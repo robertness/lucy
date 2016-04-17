@@ -2,11 +2,11 @@
 checkIndex <- function(object){
   if(!(class(object) %in% c("integer","numeric", "igraph.vs", "igraph.es"))){
     stop("Refer to edges/vertices with an integer, numeric, or igraph iterators")
-  } 
+  }
 }
 
 #' Check if updated attribute is present
-#' 
+#'
 #' @param g igraph graph object
 checkAttributes <- function(g, S){
   check.null <- is.null(S(g)$updated)  || is.null(S(g)$name)
@@ -17,7 +17,7 @@ checkAttributes <- function(g, S){
 #' Edge propagation instance
 #' Executes a callback on the edge that calculates a value.  The callback can rely
 #' on values of other edges that are calculated by the same callback.  When the function
-#' is applied to an edge, it checks that an 'update' attribute on all the edges that it 
+#' is applied to an edge, it checks that an 'update' attribute on all the edges that it
 #' relies on is set to true before applying the callback.  If not, the callback is applied
 #' to those unupdated edges first.
 #' @param g an igraph object
@@ -55,32 +55,32 @@ vertex_updater <- function(g, v, get_determiners, callback, verbose = FALSE){
 }
 
 #' Vertex/Edge Propagation in igraph
-#'   
+#'
 #' Foundation for any graph propagation algorithm, where the states of vertexes or edges propagate through the graph,
-#' changing the states of others.  Traverse the graph, land on a vertex/edge, perform a callback function on the 
-#' vertex/edge.  That callback can depend on the states of other 'determiner' vertices/edges.  When the callback is 
-#' completed successfully, the 'updated' attribute of the object is changed to \code{TRUE}. If those determiners do 
-#' not have the status \code{updated == TRUE}, then the function recursively performs the callback on the determiners until all 
+#' changing the states of others.  Traverse the graph, land on a vertex/edge, perform a callback function on the
+#' vertex/edge.  That callback can depend on the states of other 'determiner' vertices/edges.  When the callback is
+#' completed successfully, the 'updated' attribute of the object is changed to \code{TRUE}. If those determiners do
+#' not have the status \code{updated == TRUE}, then the function recursively performs the callback on the determiners until all
 #' their states are updated, before finalling performing the callback on the original vertex/edge.
-#' 
-#' \code{update_vertices} performs propagation on vertices. \code{updateEdges} performs propagation on edges.  
-#'   
+#'
+#' \code{update_vertices} performs propagation on vertices. \code{updateEdges} performs propagation on edges.
+#'
 #' @param g A graph object.
-#' @param get_determiners A function returns the vertice/edge indices that must be updated for the callback to be 
+#' @param get_determiners A function returns the vertice/edge indices that must be updated for the callback to be
 #' executed.  Arguments: g - the graph object, i - the index of a vertex/edge in g. Returns: an array of indices
 #' for the vertices/edges that are needed to perform the callback on vertex/edge i.
 #' @param callback The function performed on each vertex/edge. Arguments: g - the graph object, i - the index of a graph/edge in g.
 #' Returns: a graph object.
 #' @param verbose if TRUE prints out details of propagation
-#' @return A igraph object with updated vertex/edge states. A warning message is returned if not all vertices 
+#' @return A igraph object with updated vertex/edge states. A warning message is returned if not all vertices
 #' could be updated.
 #' @export
 update_vertices <- function(g, get_determiners, callback, verbose = FALSE){
   for(v in V(g)){
-    g <- vertex_updater(g, v, get_determiners, callback, verbose = verbose) 
+    g <- vertex_updater(g, v, get_determiners, callback, verbose = verbose)
   }
   if(!all(V(g)$updated)){
-    warning("The following were not updated: ", 
+    warning("The following were not updated: ",
             paste(V(g)[!updated]$name, collapse = ", "))
   }
   g
@@ -89,7 +89,7 @@ update_vertices <- function(g, get_determiners, callback, verbose = FALSE){
 #' Edge propagation instance
 #' Executes a callback on the edge that calculates a value.  The callback can rely
 #' on values of other edges that are calculated by the same callback.  When the function
-#' is applied to an edge, it checks that an 'update' attribute on all the edges that it 
+#' is applied to an edge, it checks that an 'update' attribute on all the edges that it
 #' relies on is set to true before applying the callback.  If not, the callback is applied
 #' to those unupdated edges first.
 #' @param g an igraph object
@@ -103,7 +103,7 @@ edge_updater <- function(g, e, get_determiners, callback, verbose = FALSE){
   checkIndex(e)
   checkAttributes(g, E)
   e <- as.numeric(e)
-  if(!(E(g)[e]$updated)){ 
+  if(!(E(g)[e]$updated)){
     determiners <- get_determiners(g, e)
     if(length(determiners) > 0){
       test.determiners.unupdated <- !E(g)[E(g) %in% determiners]$updated
@@ -119,7 +119,7 @@ edge_updater <- function(g, e, get_determiners, callback, verbose = FALSE){
           message("propagating to edges ", paste(unupdated.determiners.names, collapse = ", "))
         }
         for(d in unupdated.determiners){
-          g <- updater(g, d, get_determiners, callback)
+          g <- edge_updater(g, d, get_determiners, callback)
         }
       }
     }
@@ -130,14 +130,14 @@ edge_updater <- function(g, e, get_determiners, callback, verbose = FALSE){
   g
 }
 
-#' @describeIn update_vertices 
+#' @describeIn update_vertices
 #' @export
 update_edges <- function(g, get_determiners, callback, verbose = FALSE){
   for(e in E(g)){
-    g <- edge_updater(g, e, get_determiners, callback, verbose = verbose) 
+    g <- edge_updater(g, e, get_determiners, callback, verbose = verbose)
   }
   if(!all(V(g)$updated)){
-    warning("The following were not updated: ", 
+    warning("The following were not updated: ",
             paste(paste(get_edge_vertex(E(g)[!updated]), collapse = "<-"), collapse = ", ")
     )
   }
